@@ -116,6 +116,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/tasks/areas/color": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Define a cor de uma área
+         * @description Vale para todas as tarefas da área, inclusive as criadas depois.
+         */
+        put: operations["set-task-area-color"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/tasks/{id}": {
         parameters: {
             query?: never;
@@ -220,11 +240,25 @@ export interface components {
             /** @example Saúde */
             area: string;
             /**
+             * @description Cor escolhida pelo usuário, #rrggbb; ausente enquanto ele não escolher
+             * @example #e08a5c
+             */
+            color?: string;
+            /**
              * Format: int64
              * @description Tarefas com esta área
              * @example 3
              */
             tasks: number;
+        };
+        AreaColorBody: {
+            /** @example Saúde */
+            area: string;
+            /**
+             * @description Cor base; o app deriva dela o fundo, a borda e o texto de cada tema
+             * @example #e08a5c
+             */
+            color: string;
         };
         AreasOutputBody: {
             data: components["schemas"]["AreaBody"][] | null;
@@ -874,6 +908,66 @@ export interface operations {
             };
             /** @description Error */
             default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "set-task-area-color": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AreaColorBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AreaColorBody"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };

@@ -1,6 +1,3 @@
-import { useMemo } from 'react'
-import { areaCategoryColors } from '@/shared/theme/areaColors'
-import { useCategoryColors } from '@/shared/theme/useCategoryColors'
 import type { Task, TaskKind } from '../api/taskTypes'
 import { kindLabels } from '../taskLabels'
 import { TaskListItem } from './TaskListItem'
@@ -18,9 +15,6 @@ export type TaskListProps = {
 }
 
 export function TaskList({ tasks }: TaskListProps) {
-  const categories = useMemo(() => areaCategoryColors(tasks.map((task) => task.area)), [tasks])
-  useCategoryColors(categories)
-
   return (
     <div className="flex flex-col gap-8">
       {kindOrder.map((kind) => {

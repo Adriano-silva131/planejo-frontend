@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query'
 import { apiDelete, apiGet, apiPost, apiPut } from '@/shared/api/apiClient'
 import type { components } from '@/shared/api/schema'
-import type { Task, TaskFields, TaskPage } from './taskTypes'
+import type { AreaColor, Task, TaskFields, TaskPage } from './taskTypes'
 
 export const tasksPerPage = 100
 
@@ -35,14 +35,23 @@ export function useTaskAreas() {
   return useQuery({
     queryKey: taskKeys.areas,
     queryFn: () => apiGet<components['schemas']['AreasOutputBody']>('/tasks/areas'),
-    select: (body) => (body.data ?? []).map((item) => item.area),
+    select: (body) => body.data ?? [],
   })
 }
 
+export type SaveTaskInput = {
+  fields: TaskFields
+  areaColor?: AreaColor
+}
+
+// A cor vai antes da tarefa: se ela falhar, nada foi salvo e reenviar não cria a tarefa duas vezes.
 export function useSaveTask(id?: string) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (fields: TaskFields) => (id ? apiPut<Task>(`/tasks/${id}`, fields) : apiPost<Task>('/tasks', fields)),
+    mutationFn: async ({ fields, areaColor }: SaveTaskInput) => {
+      if (areaColor) await apiPut<AreaColor>('/tasks/areas/color', areaColor)
+      return id ? apiPut<Task>(`/tasks/${id}`, fields) : apiPost<Task>('/tasks', fields)
+    },
     onSuccess: (task) => {
       queryClient.setQueryData(taskKeys.detail(task.id), task)
       invalidatePlanning(queryClient)

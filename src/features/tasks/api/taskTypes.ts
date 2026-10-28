@@ -5,6 +5,7 @@ export type TaskFields = components['schemas']['TaskFields']
 export type Task = components['schemas']['TaskBody'] & TaskFields
 export type TaskPage = { data: Task[] | null; meta: components['schemas']['PageMeta'] }
 export type TaskArea = components['schemas']['AreaBody']
+export type AreaColor = components['schemas']['AreaColorBody']
 export type TaskKind = TaskFields['kind']
 export type Weekday = NonNullable<TaskFields['weekdays']>[number]
 export type Priority = NonNullable<TaskFields['priority']>

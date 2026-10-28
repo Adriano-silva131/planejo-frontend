@@ -1,6 +1,3 @@
-import { useMemo } from 'react'
-import { areaCategoryColors } from '@/shared/theme/areaColors'
-import { useCategoryColors } from '@/shared/theme/useCategoryColors'
 import { toIsoDate } from '@/shared/time/calendarDate'
 import { minutesSinceMidnight } from '@/shared/time/timeOfDay'
 import type { RoutineWeek } from '../api/routineTypes'
@@ -19,11 +16,6 @@ export function TodayOverview({ week, now }: TodayOverviewProps) {
   const today = toIsoDate(now)
   const blocks = week.days?.find((day) => day.date === today)?.blocks ?? []
   const plan = planDay(blocks, minutesSinceMidnight(now))
-  const categories = useMemo(
-    () => areaCategoryColors((week.days ?? []).flatMap((day) => (day.blocks ?? []).map((block) => block.area))),
-    [week],
-  )
-  useCategoryColors(categories)
 
   return (
     <div className="grid gap-6 lg:grid-cols-3 lg:gap-8">

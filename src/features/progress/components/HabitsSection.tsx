@@ -1,6 +1,4 @@
-import { useMemo } from 'react'
-import { areaCategoryColors, areaCategoryId } from '@/shared/theme/areaColors'
-import { useCategoryColors } from '@/shared/theme/useCategoryColors'
+import { areaCategoryId } from '@/shared/theme/areaColors'
 import type { Habit } from '../api/progressTypes'
 import { habitProgressText } from '../habitSummary'
 import { HabitWeekDot } from './HabitWeekDot'
@@ -11,9 +9,6 @@ export type HabitsSectionProps = {
 }
 
 export function HabitsSection({ habits, ongoingWeek }: HabitsSectionProps) {
-  const categories = useMemo(() => areaCategoryColors(habits.map((habit) => habit.area)), [habits])
-  useCategoryColors(categories)
-
   if (habits.length === 0) return null
 
   return (

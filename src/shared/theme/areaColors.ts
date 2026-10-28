@@ -1,5 +1,11 @@
 import type { CategoryColor } from './categoryColors'
 
+export type AreaColorChoice = {
+  area: string
+  color?: string
+}
+
+// Cor proposta enquanto o usuário não escolhe a da área.
 const knownAreas: Record<string, string> = {
   trabalho: '#386cc0',
   estudos: '#7b5cc4',
@@ -25,14 +31,21 @@ export function areaCategoryId(area: string) {
   return `area-${areaKey(area)}`
 }
 
-export function areaColor(area: string) {
+export function defaultAreaColor(area: string) {
   const key = areaKey(area)
   return knownAreas[key] ?? palette[hash(key) % palette.length]
 }
 
-export function areaCategoryColors(areas: Iterable<string>): CategoryColor[] {
+// Grafias da mesma área ("Saúde", "saude") dividem o id; vale a primeira cor escolhida pelo usuário.
+export function areaCategoryColors(areas: AreaColorChoice[]): CategoryColor[] {
   const unique = new Map<string, CategoryColor>()
-  for (const area of areas) unique.set(areaCategoryId(area), { id: areaCategoryId(area), color: areaColor(area) })
+  const chosen = new Set<string>()
+  for (const { area, color } of areas) {
+    const id = areaCategoryId(area)
+    if (chosen.has(id) || (unique.has(id) && !color)) continue
+    unique.set(id, { id, color: color ?? defaultAreaColor(area) })
+    if (color) chosen.add(id)
+  }
   return [...unique.values()]
 }
 

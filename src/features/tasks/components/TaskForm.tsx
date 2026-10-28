@@ -14,14 +14,14 @@ export type TaskFormProps = {
 }
 
 export function TaskForm({ task }: TaskFormProps) {
-  const { form, submit, alert, isSaving } = useTaskForm(task)
+  const { form, submit, alert, areaColor, isSaving } = useTaskForm(task)
   const kind = form.watch('kind')
 
   return (
     <form noValidate onSubmit={submit} className="flex flex-col gap-6 rounded-card border border-line bg-surface p-5 md:p-6 lg:p-8">
       <div className="grid gap-8 lg:grid-cols-2">
         <FormSection title="Sobre a atividade">
-          <TaskBasicsFields form={form} />
+          <TaskBasicsFields form={form} areaColor={areaColor.color} onAreaColorChange={areaColor.pick} />
         </FormSection>
         <FormSection title="Quando" className="lg:border-l lg:border-line lg:pl-8">
           {kind === 'fixed' && <FixedFields form={form} />}

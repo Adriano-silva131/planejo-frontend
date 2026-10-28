@@ -1,12 +1,13 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { useNavigate } from 'react-router'
 import { applyFieldErrors } from '@/shared/api/applyFieldErrors'
 import { useSaveTask } from '../api/taskQueries'
 import type { Task } from '../api/taskTypes'
 import { fromTask, toTaskPayload } from '../taskPayload'
 import { emptyTaskForm, taskFormFields, taskFormSchema, type TaskFormValues } from '../taskSchema'
+import { useAreaColor } from './useAreaColor'
 
 export function useTaskForm(task?: Task) {
   const navigate = useNavigate()
@@ -16,14 +17,17 @@ export function useTaskForm(task?: Task) {
     resolver: zodResolver(taskFormSchema),
     defaultValues: task ? fromTask(task) : emptyTaskForm,
   })
+  const areaColor = useAreaColor(useWatch({ control: form.control, name: 'area' }))
 
   const submit = form.handleSubmit((values) => {
     setAlert(undefined)
-    save.mutate(toTaskPayload(values), {
+    const fields = toTaskPayload(values)
+    const color = areaColor.changed ? { area: fields.area, color: areaColor.color } : undefined
+    save.mutate({ fields, areaColor: color }, {
       onSuccess: () => void navigate('/atividades'),
       onError: (error) => setAlert(applyFieldErrors(error, form.setError, taskFormFields)),
     })
   })
 
-  return { form, submit, alert, isSaving: save.isPending }
+  return { form, submit, alert, areaColor, isSaving: save.isPending }
 }

@@ -1,6 +1,4 @@
 import { useMemo } from 'react'
-import { areaCategoryColors } from '@/shared/theme/areaColors'
-import { useCategoryColors } from '@/shared/theme/useCategoryColors'
 import { toIsoDate } from '@/shared/time/calendarDate'
 import { ButtonLink } from '@/shared/ui/ButtonLink'
 import { SidebarPortal } from '@/shared/ui/SidebarPortal'
@@ -18,8 +16,6 @@ export function WeekContent({ week, now }: WeekContentProps) {
   const today = toIsoDate(now)
   const days = useMemo(() => week.days ?? [], [week])
   const areas = useMemo(() => [...new Set(days.flatMap((day) => (day.blocks ?? []).map((block) => block.area)))], [days])
-  const categories = useMemo(() => areaCategoryColors(areas), [areas])
-  useCategoryColors(categories)
 
   if (areas.length === 0) return <EmptyWeek />
 

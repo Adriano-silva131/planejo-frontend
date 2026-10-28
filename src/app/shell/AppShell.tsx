@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import { Outlet } from 'react-router'
+import { useAreaColorStyles } from '@/features/tasks/hooks/useAreaColorStyles'
 import { SidebarSlotContext } from '@/shared/ui/sidebarSlotContext'
 import { BottomNav } from './BottomNav'
 import { SideNav } from './SideNav'
 
 export function AppShell() {
   const [sidebarSlot, setSidebarSlot] = useState<HTMLElement | null>(null)
+  useAreaColorStyles()
 
   return (
     <SidebarSlotContext value={sidebarSlot}>
