@@ -1,9 +1,10 @@
 import { Plus } from 'lucide-react'
-import { useSearchParams } from 'react-router'
+import { Navigate, useSearchParams } from 'react-router'
 import { ButtonLink } from '@/shared/ui/ButtonLink'
 import { ErrorState } from '@/shared/ui/ErrorState'
 import { PageHeader } from '@/shared/ui/PageHeader'
 import { useTasks } from '../api/taskQueries'
+import type { TaskPage } from '../api/taskTypes'
 import { EmptyTasks } from '../components/EmptyTasks'
 import { ListSkeleton } from '../components/ListSkeleton'
 import { TaskList } from '../components/TaskList'
@@ -11,10 +12,14 @@ import { TaskPagination } from '../components/TaskPagination'
 
 export function TaskListPage() {
   const [params, setParams] = useSearchParams()
-  const page = Math.max(1, Number(params.get('pagina')) || 1)
+  const page = pageParam(params)
   const tasks = useTasks(page)
   const items = tasks.data?.data ?? []
-  const pageCount = tasks.data ? Math.ceil(tasks.data.meta.total / tasks.data.meta.perPage) : 1
+  const pageCount = pageCountOf(tasks.data)
+
+  if (tasks.isSuccess && items.length === 0 && page > 1) {
+    return <Navigate to={{ search: lastPageSearch(pageCount) }} replace />
+  }
 
   return (
     <div className="flex flex-col gap-6 lg:gap-8">
@@ -37,4 +42,17 @@ export function TaskListPage() {
       <TaskPagination page={page} pageCount={pageCount} onChange={(next) => setParams({ pagina: String(next) })} />
     </div>
   )
+}
+
+function pageParam(params: URLSearchParams) {
+  return Math.max(1, Number(params.get('pagina')) || 1)
+}
+
+function pageCountOf(data: TaskPage | undefined) {
+  return data ? Math.ceil(data.meta.total / data.meta.perPage) : 1
+}
+
+// Página além da última (depois de excluir ou por link antigo): volta para a última que existe.
+function lastPageSearch(pageCount: number) {
+  return pageCount > 1 ? `?pagina=${pageCount}` : ''
 }

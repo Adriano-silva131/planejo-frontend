@@ -32,14 +32,18 @@ export function LogTimeDialog({ item, date, open, onClose }: LogTimeDialogProps)
   const form = useForm<LogTimeValues>({ resolver: zodResolver(logTimeSchema), defaultValues: { minutes: '', completed: false } })
   const { register, formState, setError } = form
 
+  // Fechar descarta o que foi digitado e o erro da última tentativa.
+  const close = () => {
+    form.reset()
+    checkIn.reset()
+    onClose()
+  }
+
   const submit = form.handleSubmit(({ minutes, completed }) =>
     checkIn.mutate(
       { taskId: item.taskId, date, fields: { minutes: Number(minutes), completed } },
       {
-        onSuccess: () => {
-          form.reset()
-          onClose()
-        },
+        onSuccess: close,
         onError: (error) => {
           const message = applyFieldErrors(error, setError, ['minutes', 'completed'])
           if (message) setError('root', { message })
@@ -49,7 +53,7 @@ export function LogTimeDialog({ item, date, open, onClose }: LogTimeDialogProps)
   )
 
   return (
-    <Dialog open={open} title={`Tempo em "${item.title}"`} onClose={onClose}>
+    <Dialog open={open} title={`Tempo em "${item.title}"`} onClose={close}>
       <form noValidate onSubmit={submit}>
         <FormFields>
           <TextField
@@ -65,7 +69,7 @@ export function LogTimeDialog({ item, date, open, onClose }: LogTimeDialogProps)
           <CheckboxField label="Concluí esta tarefa" {...register('completed')} />
           {formState.errors.root && <FormAlert>{formState.errors.root.message}</FormAlert>}
           <FormActions>
-            <Button variant="ghost" onClick={onClose}>
+            <Button variant="ghost" onClick={close}>
               Cancelar
             </Button>
             <Button type="submit" disabled={checkIn.isPending}>

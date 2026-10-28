@@ -28,7 +28,7 @@ export function useCheckIn() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: ({ taskId, date, fields }: CheckInInput) => apiPut(`/tasks/${taskId}/checkins/${date}`, fields),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['progress'] }),
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['progress'] }),
   })
 }
 
@@ -36,6 +36,6 @@ export function useUndoCheckIn() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: ({ taskId, date }: CheckInInput) => apiDelete(`/tasks/${taskId}/checkins/${date}`),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['progress'] }),
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['progress'] }),
   })
 }

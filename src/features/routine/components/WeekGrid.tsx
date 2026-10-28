@@ -18,10 +18,15 @@ export function WeekGrid({ days, today, nowHour }: WeekGridProps) {
   const header = useRef<HTMLDivElement>(null)
   const scrollHour = initialScrollHour(range, nowHour)
   const weekStart = days[0]?.date
+  const scrolledWeek = useRef<string>(undefined)
 
+  // Rola até perto da hora atual ao abrir ou trocar de semana; a virada de hora não tira o usuário de onde ele está.
   useLayoutEffect(() => {
+    if (scrolledWeek.current === weekStart) return
     const target = scroller.current?.querySelector<HTMLElement>(`[data-hour="${scrollHour}"]`)
-    if (scroller.current && target) scroller.current.scrollTop = target.offsetTop - (header.current?.offsetHeight ?? 0)
+    if (!scroller.current || !target) return
+    scroller.current.scrollTop = target.offsetTop - (header.current?.offsetHeight ?? 0)
+    scrolledWeek.current = weekStart
   }, [scrollHour, weekStart])
 
   return (

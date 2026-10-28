@@ -30,7 +30,10 @@ export function DeleteTaskButton({ task }: DeleteTaskButtonProps) {
         confirmLabel="Excluir"
         pending={remove.isPending}
         error={error}
-        onCancel={() => setOpen(false)}
+        onCancel={() => {
+          setOpen(false)
+          remove.reset()
+        }}
         onConfirm={() => remove.mutate(task.id, { onSuccess: () => void navigate('/atividades') })}
       />
     </>

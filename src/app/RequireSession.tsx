@@ -8,7 +8,7 @@ export function RequireSession() {
 
   if (session.status === 'loading') return <SessionLoading />
   if (session.status === 'signedOut') {
-    return <Navigate to="/entrar" replace state={{ from: location.pathname }} />
+    return <Navigate to="/entrar" replace state={{ from: `${location.pathname}${location.search}${location.hash}` }} />
   }
   return <Outlet />
 }

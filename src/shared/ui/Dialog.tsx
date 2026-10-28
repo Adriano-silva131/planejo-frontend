@@ -1,4 +1,4 @@
-import { useEffect, useRef, type ReactNode } from 'react'
+import { useEffect, useId, useRef, type ReactNode } from 'react'
 
 export type DialogProps = {
   open: boolean
@@ -9,6 +9,7 @@ export type DialogProps = {
 
 export function Dialog({ open, title, onClose, children }: DialogProps) {
   const dialog = useRef<HTMLDialogElement>(null)
+  const titleId = useId()
 
   useEffect(() => {
     const element = dialog.current
@@ -19,12 +20,12 @@ export function Dialog({ open, title, onClose, children }: DialogProps) {
   return (
     <dialog
       ref={dialog}
-      aria-labelledby="dialog-title"
+      aria-labelledby={titleId}
       onClose={onClose}
       className="m-auto w-full max-w-md bg-transparent p-4 text-ink backdrop:bg-ink/40"
     >
       <div className="flex flex-col gap-4 rounded-card border border-line bg-surface p-5 md:p-6">
-        <h2 id="dialog-title" className="type-section">
+        <h2 id={titleId} className="type-section">
           {title}
         </h2>
         {children}
