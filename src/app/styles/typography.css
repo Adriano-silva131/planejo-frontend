@@ -1,0 +1,69 @@
+/* Os tamanhos dos títulos crescem de 375px a 1280px de largura, entre os valores de celular e computador do guia. */
+
+@utility type-display {
+  font-family: var(--font-display);
+  font-size: clamp(2.25rem, 1.732rem + 2.21vw, 3.5rem);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+}
+
+@utility type-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.875rem, 1.616rem + 1.105vw, 2.5rem);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+@utility type-headline {
+  font-family: var(--font-display);
+  font-size: clamp(1.625rem, 1.47rem + 0.663vw, 2rem);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+}
+
+@utility type-section {
+  font-family: var(--font-display);
+  font-size: clamp(1.375rem, 1.323rem + 0.221vw, 1.5rem);
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+@utility type-label {
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+@utility type-body {
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+@utility type-control {
+  font-family: var(--font-sans);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+@utility type-meta {
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+@utility type-eyebrow {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.4;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}

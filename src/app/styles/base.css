@@ -1,0 +1,24 @@
+@layer base {
+  :root {
+    color-scheme: light dark;
+    --hue: #8a8a8a;
+  }
+
+  :root[data-theme='light'] {
+    color-scheme: light;
+  }
+
+  :root[data-theme='dark'] {
+    color-scheme: dark;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+
+  body {
+    @apply bg-canvas text-ink type-body antialiased;
+  }
+}

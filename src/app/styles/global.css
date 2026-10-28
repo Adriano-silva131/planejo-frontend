@@ -1,0 +1,6 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/manrope/wght.css';
+@import '@fontsource-variable/plus-jakarta-sans/wght.css';
+@import './theme.css';
+@import './typography.css';
+@import './base.css';

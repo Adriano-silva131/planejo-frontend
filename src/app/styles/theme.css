@@ -1,0 +1,60 @@
+@theme {
+  --color-*: initial;
+  --color-canvas: light-dark(#faf6ef, #141d29);
+  --color-surface: light-dark(#fffdf9, #202d3b);
+  --color-nav: light-dark(#faf6ef, #182332);
+  --color-calendar: light-dark(#fffdf9, #1b2736);
+  --color-ink: light-dark(#173e66, #f5efe6);
+  --color-ink-muted: light-dark(#526171, #b5c2cf);
+  --color-line: light-dark(#dbd6cd, #314052);
+  --color-brand: #173e66;
+  --color-on-brand: light-dark(#faf6ef, #f5efe6);
+  --color-action: light-dark(#173e66, #8fb8e8);
+  --color-on-action: light-dark(#faf6ef, #142437);
+  --color-peach: light-dark(#f1b89b, #e8b398);
+  --color-on-peach: #173e66;
+  --color-accent: light-dark(#386cc0, #8fb8e8);
+  --color-danger: light-dark(#b42318, #f4a29b);
+
+  --font-*: initial;
+  --font-sans: 'Manrope Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Plus Jakarta Sans Variable', ui-sans-serif, system-ui, sans-serif;
+
+  --text-*: initial;
+
+  --radius-*: initial;
+  --radius-card: 1rem;
+  --radius-control: 0.5rem;
+}
+
+/* Cores de categoria derivadas do hex escolhido pelo usuário (--hue, definido por data-category).
+   A luminosidade é fixa por tema para o contraste não depender da cor escolhida. */
+@theme inline {
+  --color-hue: light-dark(oklch(from var(--hue) 0.91 min(c, 0.05) h), oklch(from var(--hue) 0.35 min(c, 0.055) h));
+  --color-hue-line: light-dark(oklch(from var(--hue) 0.55 min(c, 0.14) h), oklch(from var(--hue) 0.72 min(c, 0.12) h));
+  --color-on-hue: light-dark(oklch(from var(--hue) 0.32 min(c, 0.08) h), oklch(from var(--hue) 0.93 min(c, 0.04) h));
+}
+
+/* Grade do planner: uma linha a cada 5 minutos, 48px por hora. As classes de posição dos blocos
+   são montadas em tempo de execução, então são geradas aqui. */
+@utility planner-rows {
+  grid-auto-rows: 0.25rem;
+}
+
+/* A grade da semana rola por dentro e cabe na tela, descontado o cabeçalho da página. */
+@utility planner-viewport {
+  max-height: max(24rem, calc(100dvh - 10rem));
+}
+
+/* Menu suspenso preso ao botão que o abre: abaixo dele, alinhado pela direita. */
+@utility menu-anchor {
+  anchor-name: --menu-anchor;
+}
+
+@utility menu-below-end {
+  position-anchor: --menu-anchor;
+  position-area: block-end span-inline-start;
+  position-try-fallbacks: flip-block;
+}
+
+@source inline("row-start-{1..289} row-span-{1..288}");
