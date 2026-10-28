@@ -1,10 +1,14 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
   "plugins": ["react", "typescript", "oxc", "import"],
+  "ignorePatterns": ["src/shared/api/schema.d.ts"],
   "rules": {
     "react/rules-of-hooks": "error",
     "react/exhaustive-deps": "error",
     "react/only-export-components": ["warn", { "allowConstantExport": true }],
+    "react/forbid-dom-props": ["error", { "forbid": ["style"] }],
+    "react/forbid-component-props": ["error", { "forbid": ["style"] }],
+    "import/no-default-export": "error",
     "import/no-cycle": "error",
     "max-lines": ["error", { "max": 200, "skipBlankLines": true, "skipComments": true }],
     "max-lines-per-function": ["error", { "max": 80, "skipBlankLines": true, "skipComments": true }],
@@ -50,6 +54,12 @@
             ]
           }
         ]
+      }
+    },
+    {
+      "files": ["*.config.ts"],
+      "rules": {
+        "import/no-default-export": "off"
       }
     },
     {
