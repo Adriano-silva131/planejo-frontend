@@ -1,17 +1,19 @@
 import type { ReactNode } from 'react'
 import { joinClasses } from './joinClasses'
 
-type LayoutProps = {
+export type FormFieldsProps = {
   children: ReactNode
   className?: string
 }
 
-export function FormFields({ children, className }: LayoutProps) {
+export function FormFields({ children, className }: FormFieldsProps) {
   return <div className={joinClasses('flex flex-col gap-6', className)}>{children}</div>
 }
 
-export type FormSectionProps = LayoutProps & {
+export type FormSectionProps = {
   title: string
+  children: ReactNode
+  className?: string
 }
 
 export function FormSection({ title, children, className }: FormSectionProps) {
@@ -23,7 +25,12 @@ export function FormSection({ title, children, className }: FormSectionProps) {
   )
 }
 
-export function FieldRow({ children, className }: LayoutProps) {
+export type FieldRowProps = {
+  children: ReactNode
+  className?: string
+}
+
+export function FieldRow({ children, className }: FieldRowProps) {
   return <div className={joinClasses('grid max-w-md grid-cols-2 gap-4', className)}>{children}</div>
 }
 

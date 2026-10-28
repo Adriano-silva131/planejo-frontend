@@ -61,7 +61,11 @@ function CompactContent({ title, time }: CompactContentProps) {
   )
 }
 
-function FullContent({ placed }: PlannerBlockProps) {
+type FullContentProps = {
+  placed: PlacedBlock
+}
+
+function FullContent({ placed }: FullContentProps) {
   const { block } = placed
   return (
     <>
