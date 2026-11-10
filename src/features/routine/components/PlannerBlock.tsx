@@ -8,7 +8,15 @@ import type { PlacedBlock } from '../weekGrid'
 import { blockSession } from '../sessionForm'
 import { SessionDialog } from './SessionDialog'
 
-const laneClasses = ['col-span-full z-10', 'col-start-2 col-span-7 z-20', 'col-start-3 col-span-6 z-30', 'col-start-4 col-span-5 z-40']
+const soloClasses = 'col-span-full z-10 hover:z-50 focus:z-50'
+
+// Bloco sobreposto, aberto, fica acima dos vizinhos mas abaixo da faixa seguinte, que continua clicável por cima dele.
+const laneClasses = [
+  'col-span-full z-10 hover:z-15 focus:z-15',
+  'col-start-2 col-span-7 z-20 hover:z-25 focus:z-25',
+  'col-start-3 col-span-6 z-30 hover:z-35 focus:z-35',
+  'col-start-4 col-span-5 z-40 hover:z-50 focus:z-50',
+]
 
 export type PlannerBlockProps = {
   placed: PlacedBlock
@@ -25,10 +33,10 @@ export function PlannerBlock({ placed, date, dates, isPast }: PlannerBlockProps)
   const [adjusting, setAdjusting] = useState(false)
   const session = blockSession(block, date)
   const outerClasses = joinClasses(
-    'group relative min-h-0 text-left outline-none hover:z-50 focus:z-50',
+    'group relative min-h-0 text-left outline-none',
     short ? 'mx-0.5 my-px' : 'm-0.5',
     `row-start-${rowStart} row-span-${rowSpan}`,
-    overlaps ? laneClasses[lane] : laneClasses[0],
+    overlaps ? laneClasses[lane] : soloClasses,
   )
   const face = <BlockFace block={block} short={short} dimmed={isPast} raised={overlaps && lane > 0} editable={!!session} />
 
