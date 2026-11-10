@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { PlannedBlock, PlannedDay } from './api/routineTypes'
-import { dayFree, freeStretch, plannedByArea, todayFree, weekFreeMinutes } from './weekSummary'
+import { dayFree, freeGapLabels, freeStretch, plannedByArea, todayFree, weekFreeMinutes } from './weekSummary'
 
 const range = { startHour: 7, endHour: 22 }
 const at = (time: string) => Number(time.slice(0, 2)) * 60 + Number(time.slice(3))
@@ -86,5 +86,13 @@ describe('freeStretch', () => {
     expect(freeStretch(sunday, range, 0)).toEqual({ start: range.startHour * 60, end: range.endHour * 60, label: 'Livre' })
     expect(freeStretch(sunday, range, at('20:00'))).toMatchObject({ start: at('20:00'), label: 'Livre' })
     expect(freeStretch(sunday, range, range.endHour * 60)).toBeUndefined()
+  })
+})
+
+describe('freeGapLabels', () => {
+  it('rotula cada trecho livre de 30 minutos ou mais na faixa visível, a partir de quando conta', () => {
+    expect(freeGapLabels(wednesday, range, at('07:00')).map((gap) => gap.label)).toContain('6 h livres')
+    expect(freeGapLabels(sunday, range, at('20:00'))).toEqual([{ start: at('20:00'), end: at('22:00'), label: '2 h livres' }])
+    expect(freeGapLabels(sunday, range, at('21:40'))).toEqual([])
   })
 })

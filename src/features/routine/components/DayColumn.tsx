@@ -6,9 +6,9 @@ import type { PlaceInput } from '../hooks/useGridPlacement'
 import { movableDates } from '../sessionForm'
 import { columnWidthClasses, openDayTitleId, type ColumnMode } from '../weekColumns'
 import { layoutDay, type HourRange } from '../weekGrid'
-import { freeStretch } from '../weekSummary'
+import { freeGapLabels, freeStretch } from '../weekSummary'
 import { CollapsedDayColumn } from './CollapsedDayColumn'
-import { FreeStretchLabel, GridLines, NowLine } from './DayMarkers'
+import { FreeGapLabel, FreeStretchLabel, GridLines, NowLine } from './DayMarkers'
 import { PlannerBlock } from './PlannerBlock'
 
 export type DayColumnProps = {
@@ -37,7 +37,7 @@ export function DayColumn(props: DayColumnProps) {
 
 // Dia na visão geral (blocos resumidos) ou aberto (cada bloco, com o dobro da altura).
 function FullDayColumn({ day, week, range, today, now, onPlace, pending, mode, rowsClass, onOpen }: DayColumnProps) {
-  const { isToday, isPast, stretch, showNow, blockIsPast } = columnState(day, range, today, now)
+  const { isToday, isPast, freeFrom, showNow, blockIsPast } = columnState(day, range, today, now)
   const drop = useGridDrop({ date: day.date, range, enabled: !isPast, onPlace })
   const isOpen = mode === 'open'
 
@@ -46,8 +46,7 @@ function FullDayColumn({ day, week, range, today, now, onPlace, pending, mode, r
       {...drop.handlers}
       data-date={day.date}
       aria-busy={pending || undefined}
-      role={isOpen ? 'region' : undefined}
-      aria-labelledby={isOpen ? openDayTitleId(day.date) : undefined}
+      {...(isOpen && { role: 'region', 'aria-labelledby': openDayTitleId(day.date) })}
       className={joinClasses(
         'grid grid-cols-8',
         columnWidthClasses[mode],
@@ -57,7 +56,7 @@ function FullDayColumn({ day, week, range, today, now, onPlace, pending, mode, r
       )}
     >
       <GridLines range={range} />
-      {stretch && <FreeStretchLabel start={stretch.start} end={stretch.end} label={stretch.label} range={range} />}
+      <FreeMarks day={day} range={range} freeFrom={freeFrom} isOpen={isOpen} />
       {layoutDay(day.blocks ?? [], range, isOpen ? 'detail' : 'overview').map((item) => (
         <PlannerBlock
           key={`${item.block.taskId}-${item.block.start}`}
@@ -69,7 +68,7 @@ function FullDayColumn({ day, week, range, today, now, onPlace, pending, mode, r
           view={isOpen ? 'day' : 'week'}
         />
       ))}
-      {showNow && <NowLine now={now} range={range} />}
+      {showNow && <NowLine now={now} range={range} showTime={isOpen} />}
     </div>
   )
 }
@@ -77,11 +76,28 @@ function FullDayColumn({ day, week, range, today, now, onPlace, pending, mode, r
 function columnState(day: PlannedDay, range: HourRange, today: string, now: number) {
   const isToday = day.date === today
   const isPast = day.date < today
+  // De onde o livre conta: agora, se for hoje; o dia todo, se ainda vem; nada, se já passou.
+  const freeFrom = isPast ? undefined : isToday ? now : 0
   return {
     isToday,
     isPast,
-    stretch: isPast ? undefined : freeStretch(day, range, isToday ? now : 0),
+    freeFrom,
     showNow: isToday && now >= range.startHour * 60 && now < range.endHour * 60,
     blockIsPast: (end: string) => isPast || (isToday && minutesOfDay(end) <= now),
   }
+}
+
+type FreeMarksProps = {
+  day: PlannedDay
+  range: HourRange
+  freeFrom?: number
+  isOpen: boolean
+}
+
+// Onde o dia está livre: no dia aberto, cada trecho com quanto dura; na visão geral, só o maior, pelo período.
+function FreeMarks({ day, range, freeFrom, isOpen }: FreeMarksProps) {
+  if (freeFrom === undefined) return null
+  if (isOpen) return freeGapLabels(day, range, freeFrom).map((gap) => <FreeGapLabel key={gap.start} {...gap} range={range} />)
+  const stretch = freeStretch(day, range, freeFrom)
+  return stretch ? <FreeStretchLabel start={stretch.start} end={stretch.end} label={stretch.label} range={range} /> : null
 }

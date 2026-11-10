@@ -1,3 +1,4 @@
+import { formatDuration } from '@/shared/time/timeOfDay'
 import type { PlannedDay } from './api/routineTypes'
 import { blockMinutes } from './blockTime'
 import { dayItems, freeGaps, type FreeGap } from './dayItems'
@@ -74,4 +75,14 @@ function periodLabel(minute: number) {
   if (minute < 12 * 60) return 'Manhã livre'
   if (minute < 18 * 60) return 'Tarde livre'
   return 'Noite livre'
+}
+
+// Cada trecho livre de pelo menos minMinutes na faixa visível de um dia que ainda vem, com quanto tempo dura; no dia
+// aberto da Semana, para ver onde cabe algo.
+export function freeGapLabels(day: PlannedDay, range: HourRange, from: number, minMinutes = 30): FreeStretch[] {
+  const limit = range.endHour * 60
+  return freeGaps(dayItems(day), Math.max(from, range.startHour * 60))
+    .map((gap) => ({ start: gap.start, end: Math.min(gap.end, limit) }))
+    .filter((gap) => gap.end - gap.start >= minMinutes)
+    .map((gap) => ({ ...gap, label: `${formatDuration(gap.end - gap.start)} livres` }))
 }
