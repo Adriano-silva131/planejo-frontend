@@ -21,8 +21,10 @@ export type ToFitCardProps = {
 }
 
 export function ToFitCard({ day }: ToFitCardProps) {
-  const items = useToFitItems(day)
+  const { items, hasGrid } = useToFitItems(day)
   if (!items || items.length === 0) return null
+  // A grade da Semana só aparece em tela larga e com algo marcado; sem ela, encaixa-se pelo diálogo.
+  const draggable = !day && hasGrid
 
   return (
     <section aria-labelledby="to-fit-title" className="flex flex-col gap-4 rounded-card bg-surface p-5">
@@ -31,7 +33,14 @@ export function ToFitCard({ day }: ToFitCardProps) {
           {day ? 'Para encaixar hoje' : 'Para encaixar'}
         </h2>
         <p className="type-meta text-ink-muted">
-          {day ? 'Escolha o horário de cada uma.' : 'Arraste para a grade ou escolha o dia e o horário.'}
+          {draggable ? (
+            <>
+              <span className="hidden lg:inline">Arraste para a grade ou escolha o dia e o horário.</span>
+              <span className="lg:hidden">Escolha o dia e o horário de cada uma.</span>
+            </>
+          ) : (
+            `Escolha ${day ? 'o horário' : 'o dia e o horário'} de cada uma.`
+          )}
         </p>
       </div>
       {/* A lista rola por dentro para o card não passar da altura da grade; o foco permite rolar pelo teclado. */}
@@ -41,15 +50,15 @@ export function ToFitCard({ day }: ToFitCardProps) {
         className="-mr-2 flex max-h-96 flex-col gap-2 overflow-y-auto overscroll-contain pr-2 focus-visible:outline-2 focus-visible:outline-action"
       >
         {items.map((item) => (
-          <ToFitRow key={item.task.taskId} item={item} draggable={!day} />
+          <ToFitRow key={item.task.taskId} item={item} draggable={draggable} />
         ))}
       </ul>
     </section>
   )
 }
 
-// Undefined enquanto carrega ou quando a semana já passou.
-function useToFitItems(day: string | undefined) {
+// Itens undefined enquanto carrega ou quando a semana já passou.
+function useToFitItems(day: string | undefined): { items?: ToFitItem[]; hasGrid: boolean } {
   const now = useNow()
   const today = toIsoDate(now)
   const week = useWeekParam(now)
@@ -59,11 +68,12 @@ function useToFitItems(day: string | undefined) {
   const routine = useWeekRoutine(weekIso)
 
   const weekIsOver = !day && toIsoDate(addDays(week.start, 6)) < today
-  if (weekIsOver || !progress.isSuccess || !tasks.isSuccess || !routine.isSuccess) return undefined
+  if (weekIsOver || !progress.isSuccess || !tasks.isSuccess || !routine.isSuccess) return { hasGrid: false }
   const days = (routine.data.days ?? []) as PlannedDay[]
   const items = toFitItems(progress.data, tasks.data.data ?? [], days, today)
-  if (!day) return items
-  return items.flatMap((item) => (item.dates.includes(day) ? [{ ...item, dates: [day] }] : []))
+  const hasGrid = days.some((planned) => (planned.blocks ?? []).length > 0)
+  if (!day) return { items, hasGrid }
+  return { items: items.flatMap((item) => (item.dates.includes(day) ? [{ ...item, dates: [day] }] : [])), hasGrid }
 }
 
 type ToFitRowProps = {
