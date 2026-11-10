@@ -1,5 +1,6 @@
 // Divide columns entre os valores proporcionalmente, sem sobra: quem perdeu mais no arredondamento ganha a
-// coluna que falta. Valor positivo fica com ao menos uma coluna.
+// coluna que falta. Valor positivo fica com ao menos uma coluna; se esse mínimo passar do total, as colunas
+// saem dos maiores.
 export function stackedSpans(values: number[], columns: number) {
   const total = values.reduce((sum, value) => sum + value, 0)
   if (total <= 0) return values.map(() => 0)
@@ -13,6 +14,15 @@ export function stackedSpans(values: number[], columns: number) {
       spans[index] += 1
       missing -= 1
     }
+  }
+  return trimExcess(spans, -missing)
+}
+
+function trimExcess(spans: number[], excess: number) {
+  for (let left = excess; left > 0; left -= 1) {
+    const widest = spans.indexOf(Math.max(...spans))
+    if (spans[widest] <= 1) break
+    spans[widest] -= 1
   }
   return spans
 }
