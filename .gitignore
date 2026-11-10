@@ -27,3 +27,6 @@ dist-ssr
 .env
 .env.*
 !.env.example
+
+# Instalador do AWS CLI baixado localmente
+aws/
