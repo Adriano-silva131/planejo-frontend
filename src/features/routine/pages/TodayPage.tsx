@@ -1,24 +1,26 @@
-import { toIsoDate } from '@/shared/time/calendarDate'
-import { useNow } from '@/shared/time/useNow'
+import type { ReactNode } from 'react'
 import { ErrorState } from '@/shared/ui/ErrorState'
-import { useWeekRoutine } from '../api/useWeekRoutine'
+import { TodayContent } from '../components/TodayContent'
 import { TodayHeader } from '../components/TodayHeader'
-import { TodayOverview } from '../components/TodayOverview'
 import { TodaySkeleton } from '../components/TodaySkeleton'
+import { useToday } from '../hooks/useToday'
 
-export function TodayPage() {
-  const now = useNow()
-  const routine = useWeekRoutine(toIsoDate(now))
+export type TodayPageProps = {
+  aside?: ReactNode
+}
+
+export function TodayPage({ aside }: TodayPageProps) {
+  const { now, routine, day, week, freeMinutes } = useToday()
 
   return (
-    <div className="flex flex-col gap-6 lg:gap-8">
+    <div className="flex flex-col gap-6">
       <title>Meu dia · Planejo</title>
-      <TodayHeader date={now} />
+      <TodayHeader now={now} freeMinutes={freeMinutes} />
       {routine.isPending && <TodaySkeleton />}
       {routine.isError && (
         <ErrorState title="Não deu para carregar o seu dia." error={routine.error} onRetry={() => void routine.refetch()} />
       )}
-      {routine.isSuccess && <TodayOverview week={routine.data} now={now} />}
+      {routine.isSuccess && <TodayContent day={day} week={week} now={now} aside={aside} />}
     </div>
   )
 }

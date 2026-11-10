@@ -20,9 +20,9 @@ export const kindLabels: Record<TaskKind, string> = {
 }
 
 export const kindOptions: Option<TaskKind>[] = [
-  { value: 'fixed', label: 'Horário fixo', description: 'Tem hora marcada, como trabalho ou aula.' },
-  { value: 'recurring', label: 'Recorrente', description: 'Repete na semana, como academia.' },
-  { value: 'one_off', label: 'Pontual', description: 'Uma vez, até um prazo.' },
+  { value: 'fixed', label: 'Horário fixo', description: 'Toda semana na mesma hora, como trabalho ou aula.' },
+  { value: 'recurring', label: 'Recorrente', description: 'Algumas vezes por semana, como academia.' },
+  { value: 'one_off', label: 'Pontual', description: 'Acontece uma vez: um compromisso ou algo com prazo.' },
 ]
 
 export const priorityLabels: Record<Priority, string> = { high: 'Alta', medium: 'Média', low: 'Baixa' }
@@ -43,3 +43,8 @@ export const periodOptions: Option<Period | ''>[] = [
 ]
 
 export const weekdayOptions: Option<Weekday>[] = weekdayOrder.map((day) => ({ value: day, label: weekdayShort[day] }))
+
+export const timesPerWeekOptions: Option<string>[] = ['1', '2', '3', '4', '5', '6', '7'].map((times) => ({
+  value: times,
+  label: `${times}×`,
+}))

@@ -29,3 +29,18 @@ export function weekRangeLabel(start: Date) {
 export function isSameWeek(a: Date, b: Date) {
   return toIsoDate(startOfWeek(a)) === toIsoDate(startOfWeek(b))
 }
+
+// Semana ISO 8601: começa na segunda e a primeira é a que contém a primeira quinta-feira do ano.
+export function isoWeekNumber(date: Date) {
+  const thursday = addDays(startOfWeek(date), 3)
+  const firstThursday = addDays(startOfWeek(new Date(thursday.getFullYear(), 0, 4)), 3)
+  return Math.round((thursday.getTime() - firstThursday.getTime()) / (7 * 24 * 60 * 60 * 1000)) + 1
+}
+
+export function relativeWeekLabel(start: Date, now: Date) {
+  const weeks = Math.round((startOfWeek(start).getTime() - startOfWeek(now).getTime()) / (7 * 24 * 60 * 60 * 1000))
+  if (weeks === 0) return 'Esta semana'
+  if (weeks === -1) return 'Semana passada'
+  if (weeks === 1) return 'Próxima semana'
+  return weekRangeLabel(start)
+}

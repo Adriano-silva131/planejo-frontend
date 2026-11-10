@@ -7,13 +7,17 @@ export function toTaskPayload(values: TaskFormValues): TaskFields {
   const priority = values.priority || undefined
 
   if (values.kind === 'fixed') {
-    const days = values.fixedRepeat === 'date' ? { date: values.date } : { weekdays: values.weekdays }
-    return { ...base, ...days, start: values.start, end: values.end }
+    return { ...base, weekdays: values.weekdays, start: values.start, end: values.end }
+  }
+  if (values.oneOffMode === 'appointment') {
+    return { ...base, kind: 'fixed', date: values.date, start: values.start, end: values.end }
   }
   if (values.kind === 'recurring') {
-    return { ...base, priority, weekdays: values.weekdays, durationMinutes: totalMinutes(values), ...period }
+    const usualDays = values.weekdays.length > 0 ? { weekdays: values.weekdays } : {}
+    const timesPerWeek = Number(values.timesPerWeek)
+    return { ...base, priority, timesPerWeek, ...usualDays, durationMinutes: totalMinutes(values), ...period }
   }
-  return { ...base, priority, durationMinutes: totalMinutes(values), deadline: values.deadline, ...period }
+  return { ...base, priority, deadline: values.deadline, ...period }
 }
 
 const optionalFields = ['date', 'start', 'end', 'priority', 'deadline', 'period'] as const
@@ -25,9 +29,9 @@ export function fromTask(task: Task): TaskFormValues {
     ...(optional as Pick<TaskFormValues, (typeof optionalFields)[number]>),
     title: task.title,
     area: task.area,
-    kind: task.kind,
-    fixedRepeat: task.date ? 'date' : 'weekdays',
+    ...(task.date ? { kind: 'one_off', oneOffMode: 'appointment' } : { kind: task.kind }),
     weekdays: task.weekdays ?? [],
+    timesPerWeek: task.timesPerWeek ? String(task.timesPerWeek) : '',
     ...durationFields(task.durationMinutes),
   }
 }

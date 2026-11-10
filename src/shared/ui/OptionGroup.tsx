@@ -24,7 +24,7 @@ const layoutClasses = {
 }
 
 const optionClasses =
-  'flex min-h-11 flex-col justify-center rounded-control border border-line bg-surface py-2 text-ink peer-checked:border-action peer-checked:bg-action peer-checked:text-on-action peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-accent'
+  'flex min-h-11 flex-col justify-center rounded-control border border-line bg-surface py-2 text-ink peer-checked:border-action peer-checked:bg-action peer-checked:text-on-action peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-action'
 
 export function OptionGroup<T extends string>({
   legend,

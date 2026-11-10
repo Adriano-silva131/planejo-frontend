@@ -1,14 +1,15 @@
-import { Lock } from 'lucide-react'
 import { useSearchParams } from 'react-router'
-import { areaCategoryId } from '@/shared/theme/areaColors'
 import { fromIsoDate } from '@/shared/time/calendarDate'
 import { longDateLabel, weekdayInitial } from '@/shared/time/dateLabels'
+import { timeOfDayLabel } from '@/shared/time/timeOfDay'
 import { joinClasses } from '@/shared/ui/joinClasses'
-import type { RoutineDay } from '../api/routineTypes'
-import { blockTimeLabel } from '../blockTime'
+import type { PlannedDay } from '../api/routineTypes'
+import { dayItems } from '../dayItems'
+import { movableDates } from '../sessionForm'
+import { BlockRow } from './LaterItem'
 
 export type WeekDayViewProps = {
-  days: RoutineDay[]
+  days: PlannedDay[]
   today: string
 }
 
@@ -30,13 +31,13 @@ export function WeekDayView({ days, today }: WeekDayViewProps) {
         ))}
       </div>
       <h2 className="type-section first-letter:uppercase">{longDateLabel(fromIsoDate(selected.date))}</h2>
-      <DayBlocks day={selected} />
+      <DayBlocks day={selected} week={days} today={today} />
     </div>
   )
 }
 
 type DayButtonProps = {
-  day: RoutineDay
+  day: PlannedDay
   isSelected: boolean
   isToday: boolean
   onSelect: (date: string) => void
@@ -51,9 +52,9 @@ function DayButton({ day, isSelected, isToday, onSelect }: DayButtonProps) {
       aria-label={`${longDateLabel(date)}${isToday ? ', hoje' : ''}`}
       onClick={() => onSelect(day.date)}
       className={joinClasses(
-        'flex min-h-14 cursor-pointer flex-col items-center justify-center rounded-control type-meta tabular-nums focus-visible:outline-2 focus-visible:outline-accent',
+        'flex min-h-14 cursor-pointer flex-col items-center justify-center rounded-control type-meta tabular-nums focus-visible:outline-2 focus-visible:outline-action',
         isSelected ? 'bg-action text-on-action' : 'text-ink hover:bg-ink/5',
-        isToday && !isSelected && 'text-accent',
+        isToday && !isSelected && 'text-action',
       )}
     >
       <span>{weekdayInitial(date)}</span>
@@ -63,27 +64,22 @@ function DayButton({ day, isSelected, isToday, onSelect }: DayButtonProps) {
 }
 
 type DayBlocksProps = {
-  day: RoutineDay
+  day: PlannedDay
+  week: PlannedDay[]
+  today: string
 }
 
-function DayBlocks({ day }: DayBlocksProps) {
-  const blocks = day.blocks ?? []
-  if (blocks.length === 0) return <p className="text-ink-muted">Nada fixo neste dia. Uma pausa também conta.</p>
+function DayBlocks({ day, week, today }: DayBlocksProps) {
+  const items = dayItems(day)
+  if (items.length === 0) return <p className="text-ink-muted">Nada marcado neste dia. Uma pausa também conta.</p>
 
   return (
     <ol className="flex flex-col gap-3">
-      {blocks.map((block) => (
-        <li key={`${block.taskId}-${block.start}`} className="flex gap-3">
-          <span className="w-12 shrink-0 pt-3 type-meta tabular-nums text-ink-muted">{block.start}</span>
-          <div data-category={areaCategoryId(block.area)} className="flex-1 rounded-control border-l-4 border-hue-line bg-hue p-3 text-on-hue">
-            <div className="flex items-start justify-between gap-2">
-              <p className="type-label">{block.title}</p>
-              <Lock aria-hidden="true" className="mt-1 size-4 shrink-0" />
-            </div>
-            <p className="type-meta tabular-nums">
-              {block.area} · {blockTimeLabel(block)}
-            </p>
-            {block.adjusted && <p className="type-meta opacity-80">Ajustado nesta semana</p>}
+      {items.map((item) => (
+        <li key={item.key} className="flex gap-3">
+          <span className="w-12 shrink-0 pt-3 type-meta tabular-nums text-ink-muted">{timeOfDayLabel(item.start)}</span>
+          <div className="min-w-0 flex-1">
+            <BlockRow block={item.block} date={day.date} dates={movableDates(week, item.block.taskId, day.date, today)} />
           </div>
         </li>
       ))}

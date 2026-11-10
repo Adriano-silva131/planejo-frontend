@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { fromIsoDate, toIsoDate } from './calendarDate'
+import { daysBetween, fromIsoDate, toIsoDate } from './calendarDate'
 
 describe('calendarDate', () => {
   it('usa a data local, sem deslocar pelo fuso', () => {
@@ -10,5 +10,11 @@ describe('calendarDate', () => {
   it('volta para o mesmo dia', () => {
     const date = fromIsoDate('2026-10-27')
     expect([date.getFullYear(), date.getMonth(), date.getDate()]).toEqual([2026, 9, 27])
+  })
+
+  it('conta os dias entre duas datas', () => {
+    expect(daysBetween('2026-10-29', '2026-10-31')).toBe(2)
+    expect(daysBetween('2026-10-29', '2026-10-28')).toBe(-1)
+    expect(daysBetween('2026-10-30', '2026-11-03')).toBe(4)
   })
 })

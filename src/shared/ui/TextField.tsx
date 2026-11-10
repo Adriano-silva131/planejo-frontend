@@ -24,8 +24,8 @@ export function TextField({ label, hint, error, className, ...props }: TextField
         aria-describedby={[errorId, hintId].filter(Boolean).join(' ') || undefined}
         className={joinClasses(
           'min-h-12 w-full rounded-control border bg-surface px-4 text-ink placeholder:text-ink-muted',
-          'focus-visible:outline-2 focus-visible:outline-accent',
-          error ? 'border-danger' : 'border-line focus-visible:border-accent',
+          'focus-visible:outline-2 focus-visible:outline-action',
+          error ? 'border-danger' : 'border-line focus-visible:border-action',
         )}
         {...props}
       />

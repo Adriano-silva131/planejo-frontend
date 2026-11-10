@@ -8,3 +8,10 @@ export function fromIsoDate(iso: string) {
   const [year, month, day] = iso.split('-').map(Number)
   return new Date(year, month - 1, day)
 }
+
+const dayMs = 24 * 60 * 60 * 1000
+
+// Negativo quando `to` vem antes de `from`.
+export function daysBetween(from: string, to: string) {
+  return Math.round((fromIsoDate(to).getTime() - fromIsoDate(from).getTime()) / dayMs)
+}

@@ -1,37 +1,46 @@
-import { useMemo } from 'react'
-import { toIsoDate } from '@/shared/time/calendarDate'
+import type { ReactNode } from 'react'
 import { ButtonLink } from '@/shared/ui/ButtonLink'
-import { SidebarPortal } from '@/shared/ui/SidebarPortal'
-import type { RoutineWeek } from '../api/routineTypes'
+import type { PlannedDay } from '../api/routineTypes'
+import { plannedByArea, type DayFree } from '../weekSummary'
 import { AreaLegend } from './AreaLegend'
+import { PlannedHoursCard } from './PlannedHoursCard'
 import { WeekDayView } from './WeekDayView'
 import { WeekGrid } from './WeekGrid'
 
 export type WeekContentProps = {
-  week: RoutineWeek
-  now: Date
+  days: PlannedDay[]
+  free: DayFree[]
+  today: string
+  now: number
+  aside?: ReactNode
 }
 
-export function WeekContent({ week, now }: WeekContentProps) {
-  const today = toIsoDate(now)
-  const days = useMemo(() => week.days ?? [], [week])
-  const areas = useMemo(() => [...new Set(days.flatMap((day) => (day.blocks ?? []).map((block) => block.area)))], [days])
-
-  if (areas.length === 0) return <EmptyWeek />
+export function WeekContent({ days, free, today, now, aside }: WeekContentProps) {
+  const areas = plannedByArea(days)
+  const hasItems = days.some((day) => (day.blocks ?? []).length > 0)
 
   return (
-    <div className="flex flex-col gap-4">
-      <SidebarPortal>
-        <AreaLegend areas={areas} />
-      </SidebarPortal>
-      <div className="lg:hidden">
-        <AreaLegend areas={areas} />
+    <div className="grid items-start gap-6 xl:grid-cols-4 xl:gap-8">
+      <div className="flex flex-col gap-4 xl:col-span-3">
+        {hasItems ? (
+          <>
+            <div className="lg:hidden">
+              <AreaLegend areas={areas.map((item) => item.area)} />
+            </div>
+            <div className="hidden lg:block">
+              <WeekGrid days={days} free={free} today={today} now={now} />
+            </div>
+            <div className="lg:hidden">
+              <WeekDayView days={days} today={today} />
+            </div>
+          </>
+        ) : (
+          <EmptyWeek />
+        )}
       </div>
-      <div className="hidden lg:block">
-        <WeekGrid days={days} today={today} nowHour={days.some((day) => day.date === today) ? now.getHours() : undefined} />
-      </div>
-      <div className="lg:hidden">
-        <WeekDayView days={days} today={today} />
+      <div className="flex flex-col gap-6">
+        {aside}
+        <PlannedHoursCard areas={areas} />
       </div>
     </div>
   )
@@ -39,13 +48,13 @@ export function WeekContent({ week, now }: WeekContentProps) {
 
 function EmptyWeek() {
   return (
-    <section className="flex flex-col items-start gap-4 rounded-card border border-line bg-surface p-5 md:p-6">
-      <h2 className="type-section">Nada fixo nesta semana.</h2>
+    <section className="flex flex-col items-start gap-4 rounded-card bg-surface p-5 md:p-6">
+      <h2 className="type-section">Nada marcado nesta semana.</h2>
       <p className="text-ink-muted">
-        Aqui aparecem as atividades com horário fixo. Recorrentes e pontuais entram quando o planejador passar a montar a
-        semana.
+        Aqui aparecem as atividades com horário fixo e o que você encaixar de recorrentes e pontuais, no dia e no horário
+        que der.
       </p>
-      <ButtonLink to="/atividades/nova" variant="secondary">
+      <ButtonLink to="/atividades?atividade=nova" variant="secondary">
         Cadastrar atividade
       </ButtonLink>
     </section>

@@ -7,7 +7,7 @@ export function HeroSection() {
     <section aria-labelledby="hero-title" className="py-12 md:py-20">
       <LandingContainer className="grid items-center gap-10 lg:grid-cols-2 lg:gap-12">
         <div className="flex flex-col gap-6">
-          <p className="type-eyebrow text-accent">Planejamento com IA</p>
+          <p className="type-eyebrow text-action">Planejamento com IA</p>
           <h1 id="hero-title" className="type-display">
             Cabe no dia.
             <br />

@@ -12,6 +12,7 @@ function block(title: string, start: string, end: string, extra: Partial<Routine
     adjusted: false,
     continuesFromPreviousDay: false,
     continuesNextDay: false,
+    taskKind: 'fixed',
     ...extra,
   }
 }
@@ -42,16 +43,23 @@ describe('planDay', () => {
   })
 
   it('dia vazio deixa todo o resto livre', () => {
-    expect(planDay([], at('08:00'))).toEqual({ highlight: undefined, rest: [], freeMinutes: 960 })
+    expect(planDay([], at('08:00'))).toEqual({ highlight: undefined, rest: [], freeMinutes: 960, busyMinutes: 0 })
   })
 
   it('conta só o que falta do bloco em andamento', () => {
-    expect(planDay([work, gym], at('11:00')).freeMinutes).toBe(1440 - at('11:00') - 60 - 60)
+    const plan = planDay([work, gym], at('11:00'))
+    expect(plan.freeMinutes).toBe(1440 - at('11:00') - 60 - 60)
+    expect(plan.busyMinutes).toBe(120)
   })
 
   it('não conta duas vezes blocos sobrepostos', () => {
     const meeting = block('Reunião', '10:00', '11:00')
     expect(planDay([work, meeting], at('08:00')).freeMinutes).toBe(1440 - at('08:00') - 180)
+  })
+
+  it('conta livre e ocupado só até o fim do dia útil', () => {
+    const late = block('Série', '21:00', '23:00')
+    expect(planDay([gym, late], at('13:00'), at('22:00'))).toMatchObject({ freeMinutes: 9 * 60 - 60 - 60, busyMinutes: 120 })
   })
 
   it('bloco que passa da meia-noite ocupa até o fim do dia', () => {

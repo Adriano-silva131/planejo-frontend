@@ -24,7 +24,7 @@ export function HowItWorksSection() {
     <section id="como-funciona" aria-labelledby="how-title" className="scroll-mt-6 py-12 md:py-16">
       <LandingContainer className="flex flex-col gap-8">
         <div className="flex max-w-2xl flex-col gap-3">
-          <p className="type-eyebrow text-accent">Como funciona</p>
+          <p className="type-eyebrow text-action">Como funciona</p>
           <h2 id="how-title" className="type-title">
             Três passos, nenhuma planilha.
           </h2>

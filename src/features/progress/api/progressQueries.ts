@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { apiDelete, apiGet, apiPut } from '@/shared/api/apiClient'
 import type { CheckInFields, HabitsOutput, WeekProgress } from './progressTypes'
 
-export const habitWeeks = 8
+export const habitWeeks = 6
 
 type CheckInInput = {
   taskId: string

@@ -13,8 +13,8 @@ export function AppShell() {
     <SidebarSlotContext value={sidebarSlot}>
       <div className="min-h-screen lg:flex">
         <SideNav slotRef={setSidebarSlot} />
-        <main className="min-w-0 flex-1 px-4 pt-6 pb-28 md:px-8 lg:py-8">
-          <div className="mx-auto max-w-6xl">
+        <main className="min-w-0 flex-1 px-4 pt-6 pb-28 md:px-8 lg:py-6">
+          <div className="max-w-6xl 3xl:max-w-8xl">
             <Outlet />
           </div>
         </main>

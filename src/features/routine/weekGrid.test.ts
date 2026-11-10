@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest'
-import type { RoutineBlock, RoutineDay } from './api/routineTypes'
-import { hourRow, initialScrollHour, layoutDay, rowCount, visibleHours } from './weekGrid'
+import type { RoutineBlock, PlannedDay } from './api/routineTypes'
+import { hourRow, initialScrollHour, layoutDay, minuteAtOffset, rowCount, visibleHours } from './weekGrid'
 
 function block(title: string, start: string, end: string): RoutineBlock {
-  return { taskId: title, title, area: 'Trabalho', start, end, adjusted: false, continuesFromPreviousDay: false, continuesNextDay: false }
+  return { taskId: title, title, area: 'Trabalho', taskKind: 'fixed', start, end, adjusted: false, continuesFromPreviousDay: false, continuesNextDay: false }
 }
 
-const day = (blocks: RoutineBlock[] | null): RoutineDay => ({ date: '2026-10-26', weekday: 'monday', blocks })
+const day = (blocks: RoutineBlock[] | null): PlannedDay => ({ date: '2026-10-26', weekday: 'monday', blocks })
 const range = { startHour: 7, endHour: 22 }
 
 describe('visibleHours', () => {
@@ -55,5 +55,19 @@ describe('initialScrollHour', () => {
     expect(initialScrollHour({ startHour: 0, endHour: 24 }, undefined)).toBe(7)
     expect(initialScrollHour(range, 3)).toBe(7)
     expect(initialScrollHour({ startHour: 0, endHour: 24 }, 0)).toBe(0)
+  })
+})
+
+describe('minuteAtOffset', () => {
+  const range = { startHour: 7, endHour: 22 }
+
+  it('converte a altura em minuto do dia, de 15 em 15', () => {
+    expect(minuteAtOffset(0, 720, range)).toBe(7 * 60)
+    expect(minuteAtOffset(360, 720, range)).toBe(14 * 60 + 30)
+    expect(minuteAtOffset(100, 720, range)).toBe(9 * 60)
+  })
+
+  it('não passa do fim da grade', () => {
+    expect(minuteAtOffset(800, 720, range)).toBe(22 * 60 - 15)
   })
 })

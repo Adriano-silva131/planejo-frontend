@@ -12,8 +12,8 @@ const taskKeys = {
   areas: ['tasks', 'areas'] as const,
 }
 
-// Mudar uma tarefa muda a rotina e o progresso montados a partir dela. A tarefa aberta no editor não é
-// recarregada aqui: a tela navega para a lista logo em seguida.
+// Mudar uma tarefa muda a rotina e o progresso montados a partir dela. A tarefa aberta no painel não é
+// recarregada aqui: o painel fecha logo em seguida.
 function invalidatePlanning(queryClient: QueryClient) {
   void queryClient.invalidateQueries({ queryKey: taskKeys.all, predicate: (query) => query.queryKey[1] !== 'detail' })
   void queryClient.invalidateQueries({ queryKey: ['routine'] })

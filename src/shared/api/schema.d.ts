@@ -67,7 +67,7 @@ export interface paths {
         };
         /**
          * Rotina da semana
-         * @description Os blocos de cada dia, montados a partir das tarefas fixas e dos ajustes desta semana.
+         * @description Os blocos de cada dia: as tarefas fixas, com os ajustes desta semana, e as sessões que o usuário encaixou para recorrentes e pontuais.
          */
         get: operations["week-routine"];
         put?: never;
@@ -182,7 +182,7 @@ export interface paths {
         get?: never;
         /**
          * Marca a tarefa como feita no dia
-         * @description Recorrentes: sem corpo. Pontuais: minutos do dia e, se for o caso, a conclusão. Registrar de novo o mesmo dia substitui o anterior.
+         * @description Na recorrente, marca o dia como feito; na pontual, conclui a tarefa nesse dia, e para mudar o dia é preciso desfazer antes. O corpo é opcional. Registrar de novo o mesmo dia substitui o anterior.
          */
         put: operations["check-in"];
         post?: never;
@@ -202,13 +202,34 @@ export interface paths {
         };
         get?: never;
         /**
-         * Ajusta uma ocorrência de uma tarefa fixa só nesta semana
-         * @description Tira a ocorrência ou muda o horário dela, sem alterar a tarefa. Ajustar de novo substitui o ajuste anterior.
+         * Ajusta uma ocorrência de uma tarefa fixa só neste dia
+         * @description Tira a ocorrência ou muda o horário dela, sem alterar a tarefa. Ajustar de novo substitui o ajuste anterior. Recorrentes e pontuais não têm ocorrências: use as sessões.
          */
         put: operations["adjust-occurrence"];
         post?: never;
         /** Volta a ocorrência ao padrão da tarefa */
         delete: operations["reset-occurrence"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/tasks/{id}/sessions/{date}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Encaixa uma sessão de uma tarefa recorrente ou pontual num dia
+         * @description Reserva o horário na semana, em qualquer dia, sem alterar a tarefa. A tarefa tem no máximo uma sessão por dia: encaixar de novo no mesmo dia muda o horário. A sessão termina até a meia-noite.
+         */
+        put: operations["place-session"];
+        post?: never;
+        /** Tira a sessão da tarefa deste dia */
+        delete: operations["remove-session"];
         options?: never;
         head?: never;
         patch?: never;
@@ -264,7 +285,7 @@ export interface components {
             data: components["schemas"]["AreaBody"][] | null;
         };
         BlockBody: {
-            /** @description O horário desta semana difere do padrão da tarefa */
+            /** @description fixed: o horário desta semana difere do padrão da tarefa */
             adjusted: boolean;
             area: string;
             /** @description Começou no dia anterior */
@@ -272,7 +293,7 @@ export interface components {
             /** @description Termina no dia seguinte */
             continuesNextDay: boolean;
             /**
-             * @description 24:00 quando continua no dia seguinte
+             * @description 24:00 quando continua no dia seguinte ou termina à meia-noite
              * @example 18:00
              */
             end: string;
@@ -280,11 +301,16 @@ export interface components {
             start: string;
             /** Format: uuid */
             taskId: string;
+            /**
+             * @description recurring e one_off: sessão que o usuário encaixou neste dia
+             * @enum {string}
+             */
+            taskKind: "fixed" | "recurring" | "one_off";
             title: string;
         };
         ChangeFields: {
             /**
-             * @description Novo fim; antes do início, termina no dia seguinte
+             * @description Novo fim, obrigatório ao mudar o horário; antes do início, termina no dia seguinte
              * @example 16:00
              */
             end?: string;
@@ -297,31 +323,29 @@ export interface components {
             start?: string;
         };
         CheckInBody: {
-            /** @description Concluída neste dia; só em tarefa pontual */
-            completed: boolean;
             /** Format: date-time */
             createdAt: string;
-            /** Format: date */
+            /**
+             * Format: date
+             * @description Dia em que foi feita; na pontual, o dia da conclusão
+             */
             date: string;
             /**
-             * Format: int64
-             * @description Minutos dedicados no dia; 0 em tarefa recorrente
+             * @description Hora em que começou de fato; ausente quando não informada
+             * @example 07:15
              */
-            minutes: number;
+            start?: string;
             /** Format: uuid */
             taskId: string;
             /** Format: date-time */
             updatedAt: string;
         };
         CheckInFields: {
-            /** @description Só em tarefa pontual: concluída neste dia */
-            completed?: boolean;
             /**
-             * Format: int64
-             * @description Só em tarefa pontual: minutos dedicados no dia
-             * @example 90
+             * @description Hora em que a tarefa começou de fato, no fuso do usuário; opcional
+             * @example 07:15
              */
-            minutes?: number;
+            start?: string;
         };
         DayBody: {
             /** @description Em ordem de início */
@@ -427,24 +451,9 @@ export interface components {
             completedOn?: string;
             /** Format: date */
             deadline: string;
-            /**
-             * Format: int64
-             * @description Minutos registrados até o fim da semana
-             */
-            doneMinutes: number;
             /** Format: uuid */
             taskId: string;
             title: string;
-            /**
-             * Format: int64
-             * @description Duração total planejada
-             */
-            totalMinutes: number;
-            /**
-             * Format: int64
-             * @description Minutos registrados na semana
-             */
-            weekMinutes: number;
         };
         PageMeta: {
             /** Format: int64 */
@@ -485,6 +494,35 @@ export interface components {
              */
             start: string;
         };
+        SessionBody: {
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date */
+            date: string;
+            /**
+             * @description 24:00 quando termina à meia-noite
+             * @example 20:00
+             */
+            end: string;
+            /** @example 19:00 */
+            start: string;
+            /** Format: uuid */
+            taskId: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        SessionFields: {
+            /**
+             * @description Fim; 00:00 é meia-noite. Obrigatório em pontual; em recorrente, sem ele a sessão dura o tempo da tarefa
+             * @example 20:00
+             */
+            end?: string;
+            /**
+             * @description Início, no fuso do usuário
+             * @example 19:00
+             */
+            start: string;
+        };
         TaskBody: {
             /** Format: date-time */
             createdAt: string;
@@ -511,7 +549,7 @@ export interface components {
             deadline?: string;
             /**
              * Format: int64
-             * @description recurring: por sessão; one_off: total
+             * @description recurring: duração de cada sessão
              * @example 60
              */
             durationMinutes?: number;
@@ -521,7 +559,7 @@ export interface components {
              */
             end?: string;
             /**
-             * @description fixed: hora marcada, o planejador só contorna; recurring: repete nos dias escolhidos; one_off: uma vez, até o prazo
+             * @description fixed: hora marcada, o planejador só contorna; recurring: algumas vezes por semana, em qualquer dia; one_off: uma vez, até o prazo
              * @example recurring
              * @enum {string}
              */
@@ -544,11 +582,17 @@ export interface components {
              */
             start?: string;
             /**
+             * Format: int64
+             * @description recurring: quantas vezes por semana, em qualquer dia
+             * @example 3
+             */
+            timesPerWeek?: number;
+            /**
              * @description Título da tarefa
              * @example Academia
              */
             title: string;
-            /** @description recurring, ou fixed semanal */
+            /** @description fixed semanal: dias em que acontece; recurring: dias em que o usuário costuma fazer, opcional, só preferência */
             weekdays?: ("sunday" | "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday")[] | null;
         };
         WeekBody: {
@@ -1483,6 +1527,148 @@ export interface operations {
                 /** @description Id da tarefa fixa */
                 id: string;
                 /** @description Dia em que a ocorrência começa */
+                date: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "place-session": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Id da tarefa recorrente ou pontual */
+                id: string;
+                /** @description Dia da sessão */
+                date: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SessionFields"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SessionBody"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "remove-session": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Id da tarefa recorrente ou pontual */
+                id: string;
+                /** @description Dia da sessão */
                 date: string;
             };
             cookie?: never;

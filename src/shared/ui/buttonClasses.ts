@@ -1,7 +1,7 @@
 import { joinClasses } from './joinClasses'
 
 export type ButtonVariant = 'primary' | 'brand' | 'inverse' | 'secondary' | 'ghost'
-export type ButtonSize = 'md' | 'lg'
+export type ButtonSize = 'md' | 'lg' | 'icon'
 
 type ButtonStyle = {
   variant?: ButtonVariant
@@ -20,12 +20,13 @@ const variantClasses = {
 const sizeClasses = {
   md: 'min-h-12 px-4 md:min-h-11',
   lg: 'min-h-12 px-6',
+  icon: 'size-12 shrink-0 md:size-11',
 } satisfies Record<ButtonSize, string>
 
 export function buttonClasses({ variant = 'primary', size = 'md', className }: ButtonStyle) {
   return joinClasses(
     'inline-flex cursor-pointer items-center justify-center gap-2 rounded-control type-control transition',
-    'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent',
+    'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-action',
     'disabled:cursor-not-allowed disabled:opacity-50',
     variantClasses[variant],
     sizeClasses[size],

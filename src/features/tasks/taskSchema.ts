@@ -10,16 +10,19 @@ export const taskFormSchema = z
     title: z.string().trim().min(1, 'Dê um nome para a atividade.').max(120, 'Use até 120 caracteres.'),
     area: z.string().trim().min(1, 'Escolha ou digite uma área, como Saúde ou Trabalho.').max(50, 'Use até 50 caracteres.'),
     kind: z.enum(['fixed', 'recurring', 'one_off']),
-    fixedRepeat: z.enum(['weekdays', 'date']),
+    // Pontual com dia e hora marcados é um compromisso: vai para a API como fixa num dia só.
+    oneOffMode: z.enum(['deadline', 'appointment']),
     weekdays: z.array(z.enum(weekdayOrder)),
     date: z.string(),
     start: z.string(),
     end: z.string(),
-    priority: z.enum(['high', 'medium', 'low', '']),
+    // Rádio sem opção marcada chega como null.
+    priority: z.enum(['high', 'medium', 'low', '']).nullable(),
     durationHours: z.string(),
     durationMinutes: z.string(),
     deadline: z.string(),
     period: z.enum(['morning', 'afternoon', 'evening', '']),
+    timesPerWeek: z.string().nullable(),
   })
   .superRefine((values, ctx) => {
     const issue = (path: keyof TaskFormValues, message: string) => ctx.addIssue({ code: 'custom', path: [path], message })
@@ -35,7 +38,7 @@ export const emptyTaskForm: TaskFormValues = {
   title: '',
   area: '',
   kind: 'fixed',
-  fixedRepeat: 'weekdays',
+  oneOffMode: 'deadline',
   weekdays: [],
   date: '',
   start: '',
@@ -45,6 +48,7 @@ export const emptyTaskForm: TaskFormValues = {
   durationMinutes: '',
   deadline: '',
   period: '',
+  timesPerWeek: '',
 }
 
 export function totalMinutes(values: Pick<TaskFormValues, 'durationHours' | 'durationMinutes'>) {
@@ -55,19 +59,26 @@ const checksByKind: Record<TaskKind, (values: TaskFormValues, issue: Issue) => v
   fixed: checkFixed,
   recurring: (values, issue) => {
     checkPriority(values, issue)
-    if (values.weekdays.length === 0) issue('weekdays', 'Escolha ao menos um dia.')
+    if (!values.timesPerWeek) issue('timesPerWeek', 'Escolha quantas vezes por semana.')
     checkDuration(values, issue)
   },
   one_off: (values, issue) => {
+    if (values.oneOffMode === 'appointment') {
+      if (!values.date) issue('date', 'Escolha o dia.')
+      checkTimeRange(values, issue)
+      return
+    }
     checkPriority(values, issue)
-    checkDuration(values, issue)
     if (!values.deadline) issue('deadline', 'Escolha até quando ela precisa ficar pronta.')
   },
 }
 
 function checkFixed(values: TaskFormValues, issue: Issue) {
-  if (values.fixedRepeat === 'weekdays' && values.weekdays.length === 0) issue('weekdays', 'Escolha ao menos um dia.')
-  if (values.fixedRepeat === 'date' && !values.date) issue('date', 'Escolha o dia.')
+  if (values.weekdays.length === 0) issue('weekdays', 'Escolha ao menos um dia.')
+  checkTimeRange(values, issue)
+}
+
+function checkTimeRange(values: TaskFormValues, issue: Issue) {
   if (!values.start) issue('start', 'Informe o início.')
   if (!values.end) issue('end', 'Informe o fim.')
   if (values.start && values.start === values.end) issue('end', 'O fim precisa ser diferente do início.')

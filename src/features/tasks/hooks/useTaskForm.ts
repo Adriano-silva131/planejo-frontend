@@ -1,7 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
-import { useNavigate } from 'react-router'
 import { applyFieldErrors } from '@/shared/api/applyFieldErrors'
 import { useSaveTask } from '../api/taskQueries'
 import type { Task } from '../api/taskTypes'
@@ -9,8 +8,7 @@ import { fromTask, toTaskPayload } from '../taskPayload'
 import { emptyTaskForm, taskFormFields, taskFormSchema, type TaskFormValues } from '../taskSchema'
 import { useAreaColor } from './useAreaColor'
 
-export function useTaskForm(task?: Task) {
-  const navigate = useNavigate()
+export function useTaskForm(task: Task | undefined, onSaved: () => void) {
   const save = useSaveTask(task?.id)
   const [alert, setAlert] = useState<string>()
   const form = useForm<TaskFormValues>({
@@ -24,7 +22,7 @@ export function useTaskForm(task?: Task) {
     const fields = toTaskPayload(values)
     const color = areaColor.changed ? { area: fields.area, color: areaColor.color } : undefined
     save.mutate({ fields, areaColor: color }, {
-      onSuccess: () => void navigate('/atividades'),
+      onSuccess: onSaved,
       onError: (error) => setAlert(applyFieldErrors(error, form.setError, taskFormFields)),
     })
   })

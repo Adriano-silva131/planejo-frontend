@@ -9,6 +9,10 @@ export function minutesSinceMidnight(date: Date) {
   return date.getHours() * 60 + date.getMinutes()
 }
 
+export function timeOfDayLabel(minutes: number) {
+  return `${String(Math.floor(minutes / 60)).padStart(2, '0')}:${String(minutes % 60).padStart(2, '0')}`
+}
+
 export function formatDuration(totalMinutes: number) {
   const hours = Math.floor(totalMinutes / 60)
   const minutes = totalMinutes % 60

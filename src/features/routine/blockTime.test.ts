@@ -11,6 +11,7 @@ const base: RoutineBlock = {
   adjusted: false,
   continuesFromPreviousDay: false,
   continuesNextDay: false,
+  taskKind: 'fixed',
 }
 
 describe('blockTimeLabel', () => {

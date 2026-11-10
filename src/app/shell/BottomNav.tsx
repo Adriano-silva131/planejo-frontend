@@ -13,8 +13,8 @@ export function BottomNav() {
               className={({ isActive }) =>
                 joinClasses(
                   'flex min-h-16 flex-col items-center justify-center gap-1 type-meta',
-                  'focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent',
-                  isActive ? 'font-bold text-accent' : 'text-ink-muted',
+                  'focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-action',
+                  isActive ? 'font-bold text-action' : 'text-ink-muted',
                 )
               }
             >

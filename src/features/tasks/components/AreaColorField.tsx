@@ -29,7 +29,7 @@ export function AreaColorField({ area, color, onChange }: AreaColorFieldProps) {
           value={color}
           aria-describedby={hintId}
           onChange={(event) => onChange(event.target.value)}
-          className="h-12 w-16 shrink-0 cursor-pointer rounded-control border border-line bg-surface p-1 focus-visible:outline-2 focus-visible:outline-accent"
+          className="h-12 w-16 shrink-0 cursor-pointer rounded-control border border-line bg-surface p-1 focus-visible:outline-2 focus-visible:outline-action"
         />
         <span
           data-category={previewId}

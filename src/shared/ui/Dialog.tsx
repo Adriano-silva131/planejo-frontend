@@ -22,7 +22,7 @@ export function Dialog({ open, title, onClose, children }: DialogProps) {
       ref={dialog}
       aria-labelledby={titleId}
       onClose={onClose}
-      className="m-auto w-full max-w-md bg-transparent p-4 text-ink backdrop:bg-ink/40"
+      className="m-auto w-full max-w-md bg-transparent p-4 text-ink backdrop:bg-scrim"
     >
       <div className="flex flex-col gap-4 rounded-card border border-line bg-surface p-5 md:p-6">
         <h2 id={titleId} className="type-section">
