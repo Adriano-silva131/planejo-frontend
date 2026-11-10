@@ -1,3 +1,4 @@
+/// <reference types="vitest/config" />
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import { fileURLToPath } from 'node:url'
@@ -10,4 +11,6 @@ export default defineConfig({
   resolve: {
     alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
   },
+  // Testes de componente pedem jsdom no próprio arquivo (@vitest-environment jsdom); os demais rodam em node.
+  test: { setupFiles: ['src/test/setupDom.ts'] },
 })
