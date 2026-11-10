@@ -1,11 +1,11 @@
-import { useLayoutEffect, useRef } from 'react'
 import { FormAlert } from '@/shared/ui/FormAlert'
-import { joinClasses } from '@/shared/ui/joinClasses'
 import type { PlannedDay } from '../api/routineTypes'
 import { useGridPlacement } from '../hooks/useGridPlacement'
-import { hourRow, initialScrollHour, rowCount, visibleHours, type HourRange } from '../weekGrid'
+import { useGridScroll } from '../hooks/useGridScroll'
+import { initialScrollHour, visibleHours } from '../weekGrid'
 import type { DayFree } from '../weekSummary'
 import { DayColumn } from './DayColumn'
+import { HourAxis } from './HourAxis'
 import { WeekDayHeader } from './WeekDayHeader'
 
 export type WeekGridProps = {
@@ -17,23 +17,10 @@ export type WeekGridProps = {
 
 export function WeekGrid({ days, free, today, now }: WeekGridProps) {
   const range = visibleHours(days)
-  const scroller = useRef<HTMLDivElement>(null)
-  const header = useRef<HTMLDivElement>(null)
   const isCurrentWeek = days.some((day) => day.date === today)
-  const scrollHour = initialScrollHour(range, isCurrentWeek ? Math.floor(now / 60) : undefined)
-  const weekStart = days[0]?.date
-  const scrolledWeek = useRef<string>(undefined)
+  const { scroller, header } = useGridScroll(initialScrollHour(range, isCurrentWeek ? Math.floor(now / 60) : undefined), days[0]?.date)
   const placement = useGridPlacement()
   const alert = placement.alert && days.some((day) => day.date === placement.alert?.date) ? placement.alert : undefined
-
-  // Rola até perto da hora atual ao abrir ou trocar de semana; a virada de hora não tira o usuário de onde ele está.
-  useLayoutEffect(() => {
-    if (scrolledWeek.current === weekStart) return
-    const target = scroller.current?.querySelector<HTMLElement>(`[data-hour="${scrollHour}"]`)
-    if (!scroller.current || !target) return
-    scroller.current.scrollTop = target.offsetTop - (header.current?.offsetHeight ?? 0)
-    scrolledWeek.current = weekStart
-  }, [scrollHour, weekStart])
 
   return (
     <div className="flex flex-col gap-3 rounded-card bg-surface p-3">
@@ -46,7 +33,7 @@ export function WeekGrid({ days, free, today, now }: WeekGridProps) {
           ))}
         </div>
         <div className="flex gap-1">
-          <HourAxis range={range} />
+          <HourAxis range={range} rowsClass="planner-rows" />
           {days.map((day) => (
             <DayColumn
               key={day.date}
@@ -61,32 +48,6 @@ export function WeekGrid({ days, free, today, now }: WeekGridProps) {
           ))}
         </div>
       </div>
-    </div>
-  )
-}
-
-type HourAxisProps = {
-  range: HourRange
-}
-
-function HourAxis({ range }: HourAxisProps) {
-  const hours = Array.from({ length: range.endHour - range.startHour }, (_, index) => range.startHour + index)
-  return (
-    <div aria-hidden="true" className="grid w-10 shrink-0 planner-rows">
-      <div className={joinClasses('row-start-1', `row-span-${rowCount(range)}`)} />
-      {hours.map((hour) => (
-        <span
-          key={hour}
-          data-hour={hour}
-          className={joinClasses(
-            'col-start-1 pt-1 type-meta tabular-nums text-ink-muted',
-            `row-start-${hourRow(hour, range)} row-span-12`,
-            (hour - range.startHour) % 2 === 1 && 'invisible',
-          )}
-        >
-          {String(hour).padStart(2, '0')}
-        </span>
-      ))}
     </div>
   )
 }

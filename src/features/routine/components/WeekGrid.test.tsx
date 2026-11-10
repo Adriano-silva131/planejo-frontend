@@ -26,8 +26,7 @@ function renderGrid(week = days) {
       <WeekGrid days={week} free={free} today={today} now={now} />
     </QueryClientProvider>,
   )
-  // A primeira grade de linhas é o eixo das horas; as outras são os dias, na ordem da semana.
-  const columns = [...container.querySelectorAll<HTMLElement>('.planner-rows')].slice(1)
+  const columns = [...container.querySelectorAll<HTMLElement>('[data-date]')]
   for (const column of columns) vi.spyOn(column, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, 100, 900))
   return columns
 }
