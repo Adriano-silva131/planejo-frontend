@@ -73,6 +73,12 @@ describe('toFitItems', () => {
     expect(full.map((item) => item.task.taskId)).not.toContain('Inglês')
   })
 
+  it('oferece a pontual só até o prazo; atrasada, todos os dias que restam', () => {
+    expect(items[0].dates).toEqual(['2026-10-28', '2026-10-29', '2026-10-30', '2026-10-31'])
+    const late = toFitItems({ ...progress, oneOff: [{ taskId: 'Finanças', title: 'Finanças', deadline: '2026-10-27' }] }, tasks, days(), today)
+    expect(late.find((item) => item.task.taskId === 'Finanças')?.dates).toEqual(week.slice(2))
+  })
+
   it('mostra quando a pontual já tem sessão', () => {
     const planned = toFitItems(progress, tasks, days({ '2026-10-30': [session('Finanças')] }), today)
     expect(planned[0]).toMatchObject({ detail: 'Prazo sáb · encaixada sex' })

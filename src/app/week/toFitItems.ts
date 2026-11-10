@@ -12,7 +12,8 @@ export type ToFitItem = {
   detail: string
   badge: string
   urgent: boolean
-  // Dias de hoje em diante em que dá para encaixar uma sessão: sem outra sessão da atividade e sem registro de feito.
+  // Dias de hoje em diante em que dá para encaixar uma sessão: sem outra sessão da atividade, sem registro de feito
+  // e, na pontual no prazo, até o prazo.
   dates: string[]
   // Quanto a sessão ocupa ao ser arrastada para a grade.
   minutes: number
@@ -65,7 +66,7 @@ export function toFitItems(progress: WeekProgress, tasks: Task[], days: PlannedD
           detail: `Prazo ${weekday(item.deadline)}${placed}`,
           badge: daysLeftLabel(days),
           urgent: days <= urgentDays,
-          dates: openDates(ahead, task.id, []),
+          dates: untilDeadline(openDates(ahead, task.id, []), item.deadline, today),
           minutes: oneOffMinutes,
         },
       ]
@@ -77,6 +78,11 @@ function openDates(days: PlannedDay[], taskId: string, done: string[]) {
   return days
     .filter((day) => !done.includes(day.date) && !(day.blocks ?? []).some((block) => block.taskId === taskId))
     .map((day) => day.date)
+}
+
+// Pontual só vai até o prazo. Atrasada, segue encaixável nos dias que restam para ainda ser feita.
+function untilDeadline(dates: string[], deadline: string, today: string) {
+  return deadline < today ? dates : dates.filter((date) => date <= deadline)
 }
 
 function weekday(date: string) {
