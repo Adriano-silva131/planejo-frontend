@@ -20,50 +20,55 @@ export type SessionDialogProps = {
   onClose: () => void
 }
 
+// O formulário só existe com o diálogo aberto: cada abertura parte do dia e do horário atuais da sessão.
 export function SessionDialog({ task, dates, current, open, onClose }: SessionDialogProps) {
-  const { form, submit, reset, removeSession, alert, isSaving } = useSessionForm({ task, dates, current, onDone: onClose })
+  return (
+    <Dialog open={open} title={`${current ? 'Mudar' : 'Encaixar'} "${task.title}"`} onClose={onClose}>
+      {open && <SessionForm task={task} dates={dates} current={current} onClose={onClose} />}
+    </Dialog>
+  )
+}
+
+type SessionFormProps = Omit<SessionDialogProps, 'open'>
+
+function SessionForm({ task, dates, current, onClose }: SessionFormProps) {
+  const { form, submit, removeSession, alert, isSaving } = useSessionForm({ task, dates, current, onDone: onClose })
   const { register, formState } = form
-  const close = () => {
-    reset()
-    onClose()
-  }
 
   return (
-    <Dialog open={open} title={`${current ? 'Mudar' : 'Encaixar'} "${task.title}"`} onClose={close}>
-      <form noValidate onSubmit={(event) => void submit(event)}>
-        <FormFields>
-          <OptionGroup legend="Dia" options={dates.map(dayOption)} error={formState.errors.date?.message} {...register('date')} />
-          <FieldRow>
-            <TextField label="Começa às" type="time" required error={formState.errors.start?.message} {...register('start')} />
-            <TextField
-              label="Termina às"
-              type="time"
-              required={task.kind === 'one_off'}
-              hint={endHint(task)}
-              error={formState.errors.end?.message}
-              {...register('end')}
-            />
-          </FieldRow>
-          {alert && <FormAlert>{alert}</FormAlert>}
-          <FormActions
-            start={
-              removeSession && (
-                <Button variant="ghost" disabled={isSaving} onClick={removeSession}>
-                  Tirar do dia
-                </Button>
-              )
-            }
-          >
-            <Button variant="ghost" onClick={close}>
-              Cancelar
-            </Button>
-            <Button type="submit" disabled={isSaving}>
-              {isSaving ? 'Salvando…' : current ? 'Salvar' : 'Encaixar'}
-            </Button>
-          </FormActions>
-        </FormFields>
-      </form>
-    </Dialog>
+    <form noValidate onSubmit={(event) => void submit(event)}>
+      <FormFields>
+        <OptionGroup legend="Dia" options={dates.map(dayOption)} error={formState.errors.date?.message} {...register('date')} />
+        <FieldRow>
+          <TextField label="Começa às" type="time" required error={formState.errors.start?.message} {...register('start')} />
+          <TextField
+            label="Termina às"
+            type="time"
+            required={task.kind === 'one_off'}
+            hint={endHint(task)}
+            error={formState.errors.end?.message}
+            {...register('end')}
+          />
+        </FieldRow>
+        {alert && <FormAlert>{alert}</FormAlert>}
+        <FormActions
+          start={
+            removeSession && (
+              <Button variant="ghost" disabled={isSaving} onClick={removeSession}>
+                Tirar do dia
+              </Button>
+            )
+          }
+        >
+          <Button variant="ghost" onClick={onClose}>
+            Cancelar
+          </Button>
+          <Button type="submit" disabled={isSaving}>
+            {isSaving ? 'Salvando…' : current ? 'Salvar' : 'Encaixar'}
+          </Button>
+        </FormActions>
+      </FormFields>
+    </form>
   )
 }
 

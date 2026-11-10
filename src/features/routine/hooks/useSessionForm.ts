@@ -17,19 +17,10 @@ export function useSessionForm({ task, dates, current, onDone }: SessionFormOpti
   const move = useMoveSession()
   const remove = useRemoveSession()
   const [alert, setAlert] = useState<string>()
-  const defaults = sessionDefaults(dates, current)
-  const form = useForm<SessionFormValues>({ resolver: zodResolver(sessionFormSchema(task.kind)), defaultValues: defaults })
+  const form = useForm<SessionFormValues>({ resolver: zodResolver(sessionFormSchema(task.kind)), defaultValues: sessionDefaults(dates, current) })
 
-  const reset = () => {
-    form.reset(defaults)
-    setAlert(undefined)
-    for (const mutation of [place, move, remove]) mutation.reset()
-  }
   const handlers = {
-    onSuccess: () => {
-      reset()
-      onDone()
-    },
+    onSuccess: onDone,
     onError: (error: Error) => setAlert(error instanceof ApiError ? error.message : 'Não deu para salvar agora. Tente de novo.'),
   }
 
@@ -41,5 +32,5 @@ export function useSessionForm({ task, dates, current, onDone }: SessionFormOpti
   })
   const removeSession = current ? () => remove.mutate({ taskId: task.taskId, date: current.date }, handlers) : undefined
 
-  return { form, submit, reset, removeSession, alert, isSaving: place.isPending || move.isPending || remove.isPending }
+  return { form, submit, removeSession, alert, isSaving: place.isPending || move.isPending || remove.isPending }
 }
