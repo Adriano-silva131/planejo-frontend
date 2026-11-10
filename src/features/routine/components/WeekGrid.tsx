@@ -1,39 +1,48 @@
+import type { KeyboardEvent } from 'react'
 import { FormAlert } from '@/shared/ui/FormAlert'
 import type { PlannedDay } from '../api/routineTypes'
 import { useGridPlacement } from '../hooks/useGridPlacement'
 import { useGridScroll } from '../hooks/useGridScroll'
-import { initialScrollHour, visibleHours } from '../weekGrid'
+import { useOpenDayFocus } from '../hooks/useOpenDayFocus'
+import { columnMode, rowsClass } from '../weekColumns'
+import { dayScrollHour, initialScrollHour, visibleHours, type HourRange } from '../weekGrid'
 import type { DayFree } from '../weekSummary'
 import { DayColumn } from './DayColumn'
 import { HourAxis } from './HourAxis'
-import { WeekDayHeader } from './WeekDayHeader'
+import { WeekGridHeader } from './WeekGridHeader'
 
 export type WeekGridProps = {
   days: PlannedDay[]
   free: DayFree[]
   today: string
   now: number
+  // Dia aberto na grade; sem ele, a visão geral da semana.
+  openDate?: string
+  onOpen: (date: string) => void
+  onClose: () => void
 }
 
-export function WeekGrid({ days, free, today, now }: WeekGridProps) {
+export function WeekGrid({ days, free, today, now, openDate, onOpen, onClose }: WeekGridProps) {
   const range = visibleHours(days)
-  const isCurrentWeek = days.some((day) => day.date === today)
-  const { scroller, header } = useGridScroll(initialScrollHour(range, isCurrentWeek ? Math.floor(now / 60) : undefined), days[0]?.date)
+  const { scroller, header } = useGridScroll(scrollHour(days, range, { today, now, openDate }), `${days[0]?.date}|${openDate ?? ''}`)
   const placement = useGridPlacement()
   const alert = placement.alert && days.some((day) => day.date === placement.alert?.date) ? placement.alert : undefined
+  const rows = rowsClass(openDate)
+  useOpenDayFocus(openDate)
+
+  // Esc fecha o dia aberto, a não ser que venha de um diálogo aberto dentro da grade, que fecha sozinho.
+  const onKeyDown = (event: KeyboardEvent) => {
+    if (event.key !== 'Escape' || !openDate || (event.target as Element).closest('dialog')) return
+    onClose()
+  }
 
   return (
-    <div className="flex flex-col gap-3 rounded-card bg-surface p-3">
+    <div onKeyDown={onKeyDown} className="flex flex-col gap-3 rounded-card bg-surface p-3">
       {alert && <FormAlert onDismiss={placement.dismiss}>{alert.message}</FormAlert>}
       <div ref={scroller} className="relative planner-viewport overflow-y-auto overscroll-contain">
-        <div ref={header} className="sticky top-0 z-60 flex gap-1 bg-surface">
-          <div className="w-10 shrink-0" />
-          {free.map((day) => (
-            <WeekDayHeader key={day.date} free={day} isToday={day.date === today} />
-          ))}
-        </div>
+        <WeekGridHeader ref={header} free={free} today={today} range={range} openDate={openDate} onOpen={onOpen} onClose={onClose} />
         <div className="flex gap-1">
-          <HourAxis range={range} rowsClass="planner-rows" />
+          <HourAxis range={range} rowsClass={rows} />
           {days.map((day) => (
             <DayColumn
               key={day.date}
@@ -44,10 +53,22 @@ export function WeekGrid({ days, free, today, now }: WeekGridProps) {
               now={now}
               onPlace={placement.place}
               pending={placement.pendingDate === day.date}
+              mode={columnMode(day.date, openDate)}
+              rowsClass={rows}
+              onOpen={onOpen}
             />
           ))}
         </div>
       </div>
     </div>
   )
+}
+
+type ScrollMoment = { today: string; now: number; openDate?: string }
+
+function scrollHour(days: PlannedDay[], range: HourRange, { today, now, openDate }: ScrollMoment) {
+  const openDay = days.find((day) => day.date === openDate)
+  if (openDay) return dayScrollHour(openDay, range, today, Math.floor(now / 60))
+  const isCurrentWeek = days.some((day) => day.date === today)
+  return initialScrollHour(range, isCurrentWeek ? Math.floor(now / 60) : undefined)
 }

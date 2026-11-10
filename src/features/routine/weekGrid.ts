@@ -133,6 +133,13 @@ export function initialScrollHour(range: HourRange, nowHour: number | undefined)
   return Math.min(Math.max(preferred, range.startHour), range.endHour - 1)
 }
 
+// Hora em que o dia aberto começa: perto de agora se for hoje; nos outros, logo antes do primeiro bloco.
+export function dayScrollHour(day: PlannedDay, range: HourRange, today: string, nowHour: number) {
+  if (day.date === today) return initialScrollHour(range, nowHour)
+  const starts = (day.blocks ?? []).map((block) => minutesOfDay(block.start))
+  return initialScrollHour(range, starts.length > 0 ? Math.floor(Math.min(...starts) / 60) : undefined)
+}
+
 // Minuto do dia sob o ponto em que algo foi solto na coluna, arredondado para step minutos.
 export function minuteAtOffset(offset: number, height: number, range: HourRange, step = 15) {
   const span = (range.endHour - range.startHour) * 60

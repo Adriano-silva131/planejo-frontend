@@ -10,7 +10,7 @@ export type WeekPageProps = {
 }
 
 export function WeekPage({ aside }: WeekPageProps) {
-  const { week, routine, days, free, today, now, totalFree } = useWeekView()
+  const { week, routine, days, free, today, now, totalFree, openDate, openDay, closeDay } = useWeekView()
 
   return (
     <div className="flex flex-col gap-6 lg:gap-8">
@@ -21,7 +21,14 @@ export function WeekPage({ aside }: WeekPageProps) {
         <ErrorState title="Não deu para carregar a semana." error={routine.error} onRetry={() => void routine.refetch()} />
       )}
       {routine.isSuccess && (
-        <WeekContent days={days} free={free} today={today} now={now} aside={aside} />
+        <WeekContent
+          days={days}
+          free={free}
+          today={today}
+          now={now}
+          aside={aside}
+          openDay={{ date: openDate, open: openDay, close: closeDay }}
+        />
       )}
     </div>
   )

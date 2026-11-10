@@ -13,9 +13,17 @@ export type WeekContentProps = {
   today: string
   now: number
   aside?: ReactNode
+  openDay: OpenDayControl
 }
 
-export function WeekContent({ days, free, today, now, aside }: WeekContentProps) {
+// Dia aberto na grade e como abrir ou fechar outro.
+export type OpenDayControl = {
+  date?: string
+  open: (date: string) => void
+  close: () => void
+}
+
+export function WeekContent({ days, free, today, now, aside, openDay }: WeekContentProps) {
   const areas = plannedByArea(days)
   const hasItems = days.some((day) => (day.blocks ?? []).length > 0)
 
@@ -28,7 +36,7 @@ export function WeekContent({ days, free, today, now, aside }: WeekContentProps)
               <AreaLegend areas={areas.map((item) => item.area)} />
             </div>
             <div className="hidden lg:block">
-              <WeekGrid days={days} free={free} today={today} now={now} />
+              <WeekGrid days={days} free={free} today={today} now={now} openDate={openDay.date} onOpen={openDay.open} onClose={openDay.close} />
             </div>
             <div className="lg:hidden">
               <WeekDayView days={days} today={today} />

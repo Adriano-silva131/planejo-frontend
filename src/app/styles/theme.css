@@ -45,6 +45,11 @@
   grid-auto-rows: 0.1875rem;
 }
 
+/* Dia aberto na grade da semana: o dobro da altura (72px por hora), para blocos curtos terem uma linha de texto. */
+@utility planner-rows-roomy {
+  grid-auto-rows: 0.375rem;
+}
+
 /* A grade da semana rola por dentro e cabe na tela, descontado o cabeçalho da página. */
 @utility planner-viewport {
   max-height: max(24rem, calc(100dvh - 10rem));

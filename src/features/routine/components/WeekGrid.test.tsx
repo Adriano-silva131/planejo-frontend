@@ -23,7 +23,7 @@ function renderGrid(week = days) {
   const free = week.map((day) => dayFree(day, visibleHours(week), today, now))
   const { container } = render(
     <QueryClientProvider client={new QueryClient()}>
-      <WeekGrid days={week} free={free} today={today} now={now} />
+      <WeekGrid days={week} free={free} today={today} now={now} onOpen={() => {}} onClose={() => {}} />
     </QueryClientProvider>,
   )
   const columns = [...container.querySelectorAll<HTMLElement>('[data-date]')]

@@ -20,11 +20,13 @@ export type PlannerBlockProps = {
   // Dias para onde a sessão pode ir.
   dates: string[]
   isPast: boolean
+  // Etiqueta com outros blocos abre o dia, onde cada um aparece separado.
+  onOpenDay: () => void
 }
 
-// Sessão encaixada é um botão que abre a mudança de horário; bloco de fixa e etiqueta com outros blocos só mostram
-// os detalhes.
-export function PlannerBlock({ placed, date, dates, isPast }: PlannerBlockProps) {
+// Sessão encaixada é um botão que abre a mudança de horário; etiqueta com outros blocos abre o dia; bloco de fixa só
+// mostra os detalhes.
+export function PlannerBlock({ placed, date, dates, isPast, onOpenDay }: PlannerBlockProps) {
   const { block, rowStart, rowSpan, lane, layer, overlaps, side, extras } = placed
   const size = blockSize(rowSpan * slotMinutes)
   const [adjusting, setAdjusting] = useState(false)
@@ -37,6 +39,13 @@ export function PlannerBlock({ placed, date, dates, isPast }: PlannerBlockProps)
   )
   const face = <BlockFace block={block} extras={extras} size={size} dimmed={isPast} raised={overlaps && layer > 0 && !side} editable={!!session} />
 
+  if (extras.length > 0) {
+    return (
+      <button type="button" onClick={onOpenDay} className={joinClasses(outerClasses, 'cursor-pointer')}>
+        {face}
+      </button>
+    )
+  }
   if (!session) {
     return (
       <div tabIndex={0} className={outerClasses}>
