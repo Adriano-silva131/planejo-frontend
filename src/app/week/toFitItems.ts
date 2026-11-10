@@ -3,7 +3,7 @@ import type { PlannedDay } from '@/features/routine/api/routineTypes'
 import type { SessionTask } from '@/features/routine/sessionForm'
 import type { Task } from '@/features/tasks/api/taskTypes'
 import { daysBetween, fromIsoDate } from '@/shared/time/calendarDate'
-import { daysLeftLabel, shortWeekdayLabel } from '@/shared/time/dateLabels'
+import { daysLeftLabel, shortWeekdayLabel, weekdayIn } from '@/shared/time/dateLabels'
 import { formatDuration } from '@/shared/time/timeOfDay'
 
 export type ToFitItem = {
@@ -87,4 +87,26 @@ function untilDeadline(dates: string[], deadline: string, today: string) {
 
 function weekday(date: string) {
   return shortWeekdayLabel(fromIsoDate(date)).toLowerCase()
+}
+
+// Onde o card aparece: no Meu dia, só hoje; na Semana, a semana toda ou o dia aberto na grade.
+export type ToFitContext = 'today' | 'week'
+
+export function toFitTitle(context: ToFitContext, day: string | undefined) {
+  if (context === 'today') return 'Para encaixar hoje'
+  return day ? `Para encaixar ${weekdayIn(fromIsoDate(day))}` : 'Para encaixar'
+}
+
+// O que dá para fazer com cada item: escolher o horário (e o dia, se nenhum estiver escolhido) e, em tela larga com a
+// grade à vista, arrastar.
+export function toFitHint(day: string | undefined, draggable: boolean) {
+  const narrow = day ? 'Escolha o horário de cada uma.' : 'Escolha o dia e o horário de cada uma.'
+  if (!draggable) return { wide: narrow, narrow }
+  return { wide: day ? 'Arraste para o dia aberto ou escolha o horário.' : 'Arraste para a grade ou escolha o dia e o horário.', narrow }
+}
+
+// Com um dia escolhido, só o que pode ir para ele, e só para ele.
+export function toFitOn(items: ToFitItem[], day: string | undefined) {
+  if (!day) return items
+  return items.flatMap((item) => (item.dates.includes(day) ? [{ ...item, dates: [day] }] : []))
 }

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import type { WeekProgress } from '@/features/progress/api/progressTypes'
 import type { PlannedBlock, PlannedDay } from '@/features/routine/api/routineTypes'
 import type { Task } from '@/features/tasks/api/taskTypes'
-import { toFitItems } from './toFitItems'
+import { toFitHint, toFitItems, toFitOn, toFitTitle } from './toFitItems'
 
 function task(id: string, area: string, durationMinutes?: number): Task {
   return { id, title: id, area, kind: 'recurring', durationMinutes, createdAt: '', updatedAt: '' } as Task
@@ -83,5 +83,26 @@ describe('toFitItems', () => {
     const planned = toFitItems(progress, tasks, days({ '2026-10-30': [session('Finanças')] }), today)
     expect(planned[0]).toMatchObject({ detail: 'Prazo sáb · encaixada sex' })
     expect(planned[0].dates).not.toContain('2026-10-30')
+  })
+})
+
+describe('textos e filtro do card', () => {
+  it('dá o título pelo lugar e pelo dia escolhido', () => {
+    expect(toFitTitle('today', '2026-11-10')).toBe('Para encaixar hoje')
+    expect(toFitTitle('week', undefined)).toBe('Para encaixar')
+    expect(toFitTitle('week', '2026-11-10')).toBe('Para encaixar na terça')
+    expect(toFitTitle('week', '2026-11-14')).toBe('Para encaixar no sábado')
+  })
+
+  it('só fala em arrastar quando dá para arrastar', () => {
+    expect(toFitHint('2026-11-10', true).wide).toBe('Arraste para o dia aberto ou escolha o horário.')
+    expect(toFitHint(undefined, false)).toEqual({ wide: 'Escolha o dia e o horário de cada uma.', narrow: 'Escolha o dia e o horário de cada uma.' })
+  })
+
+  it('com um dia escolhido, deixa só o que pode ir para ele', () => {
+    const items = toFitItems(progress, tasks, days(), today)
+    const onFriday = toFitOn(items, '2026-10-30')
+    expect(onFriday.every((item) => item.dates.length === 1 && item.dates[0] === '2026-10-30')).toBe(true)
+    expect(toFitOn(items, undefined)).toBe(items)
   })
 })

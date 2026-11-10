@@ -1,4 +1,6 @@
 import type { ReactNode } from 'react'
+import { fromIsoDate } from '@/shared/time/calendarDate'
+import { weekdayOf } from '@/shared/time/dateLabels'
 import { ButtonLink } from '@/shared/ui/ButtonLink'
 import type { PlannedDay } from '../api/routineTypes'
 import { plannedByArea, type DayFree } from '../weekSummary'
@@ -24,7 +26,9 @@ export type OpenDayControl = {
 }
 
 export function WeekContent({ days, free, today, now, aside, openDay }: WeekContentProps) {
+  const opened = days.find((day) => day.date === openDay.date)
   const areas = plannedByArea(days)
+  const hoursTitle = opened ? `Horas ${weekdayOf(fromIsoDate(opened.date))}` : 'Horas planejadas'
   const hasItems = days.some((day) => (day.blocks ?? []).length > 0)
 
   return (
@@ -48,7 +52,7 @@ export function WeekContent({ days, free, today, now, aside, openDay }: WeekCont
       </div>
       <div className="flex flex-col gap-6">
         {aside}
-        <PlannedHoursCard areas={areas} />
+        <PlannedHoursCard areas={opened ? plannedByArea([opened]) : areas} title={hoursTitle} />
       </div>
     </div>
   )

@@ -5,17 +5,22 @@ import type { AreaHours } from '../weekSummary'
 
 export type PlannedHoursCardProps = {
   areas: AreaHours[]
+  title: string
 }
 
-export function PlannedHoursCard({ areas }: PlannedHoursCardProps) {
+export function PlannedHoursCard({ areas, title }: PlannedHoursCardProps) {
   if (areas.length === 0) return null
+  const total = areas.reduce((sum, item) => sum + item.minutes, 0)
   const label = areas.map((item) => `${item.area}: ${formatDuration(item.minutes)}`).join(', ')
 
   return (
     <section aria-labelledby="planned-hours-title" className="flex flex-col gap-4 rounded-card bg-surface p-5">
-      <h2 id="planned-hours-title" className="type-label">
-        Horas planejadas
-      </h2>
+      <div className="flex items-baseline justify-between gap-2">
+        <h2 id="planned-hours-title" className="type-label">
+          {title}
+        </h2>
+        <span className="type-meta tabular-nums text-ink-muted">{formatDuration(total)}</span>
+      </div>
       <StackedBar
         label={label}
         segments={areas.map((item) => ({ key: item.area, value: item.minutes, category: areaCategoryId(item.area) }))}

@@ -13,67 +13,69 @@ import { useWeekParam } from '@/shared/time/useWeekParam'
 import { addDays } from '@/shared/time/week'
 import { Button } from '@/shared/ui/Button'
 import { joinClasses } from '@/shared/ui/joinClasses'
-import { toFitItems, type ToFitItem } from './toFitItems'
+import { toFitHint, toFitItems, toFitOn, toFitTitle, type ToFitContext, type ToFitItem } from './toFitItems'
 
 export type ToFitCardProps = {
-  // Só o que dá para encaixar neste dia, como no Meu dia.
+  context: ToFitContext
+  // Só o que dá para encaixar neste dia: hoje no Meu dia, ou o dia aberto na Semana.
   day?: string
 }
 
-export function ToFitCard({ day }: ToFitCardProps) {
-  const { items, hasGrid } = useToFitItems(day)
-  if (!items || items.length === 0) return null
+export function ToFitCard({ context, day }: ToFitCardProps) {
+  const { items, hasGrid } = useToFitItems(context, day)
+  if (!items || (items.length === 0 && !day)) return null
   // A grade da Semana só aparece em tela larga e com algo marcado; sem ela, encaixa-se pelo diálogo.
-  const draggable = !day && hasGrid
+  const draggable = context === 'week' && hasGrid
+  const hint = toFitHint(day, draggable)
+  const title = toFitTitle(context, day)
 
   return (
     <section aria-labelledby="to-fit-title" className="flex flex-col gap-4 rounded-card bg-surface p-5">
       <div>
         <h2 id="to-fit-title" className="type-label">
-          {day ? 'Para encaixar hoje' : 'Para encaixar'}
+          {title}
         </h2>
-        <p className="type-meta text-ink-muted">
-          {draggable ? (
-            <>
-              <span className="hidden lg:inline">Arraste para a grade ou escolha o dia e o horário.</span>
-              <span className="lg:hidden">Escolha o dia e o horário de cada uma.</span>
-            </>
-          ) : (
-            `Escolha ${day ? 'o horário' : 'o dia e o horário'} de cada uma.`
-          )}
-        </p>
+        {items.length > 0 && (
+          <p className="type-meta text-ink-muted">
+            <span className="hidden lg:inline">{hint.wide}</span>
+            <span className="lg:hidden">{hint.narrow}</span>
+          </p>
+        )}
       </div>
-      {/* A lista rola por dentro para o card não passar da altura da grade; o foco permite rolar pelo teclado. */}
-      <ul
-        tabIndex={0}
-        aria-labelledby="to-fit-title"
-        className="-mr-2 flex max-h-96 flex-col gap-2 overflow-y-auto overscroll-contain pr-2 focus-visible:outline-2 focus-visible:outline-action"
-      >
-        {items.map((item) => (
-          <ToFitRow key={item.task.taskId} item={item} draggable={draggable} />
-        ))}
-      </ul>
+      {items.length === 0 ? (
+        <p className="type-meta text-ink-muted">{`${title.replace('Para encaixar', 'Nada falta encaixar')}.`}</p>
+      ) : (
+        // A lista rola por dentro para o card não passar da altura da grade; o foco permite rolar pelo teclado.
+        <ul
+          tabIndex={0}
+          aria-labelledby="to-fit-title"
+          className="-mr-2 flex max-h-96 flex-col gap-2 overflow-y-auto overscroll-contain pr-2 focus-visible:outline-2 focus-visible:outline-action"
+        >
+          {items.map((item) => (
+            <ToFitRow key={item.task.taskId} item={item} draggable={draggable} />
+          ))}
+        </ul>
+      )}
     </section>
   )
 }
 
-// Itens undefined enquanto carrega ou quando a semana já passou.
-function useToFitItems(day: string | undefined): { items?: ToFitItem[]; hasGrid: boolean } {
+// Itens undefined enquanto carrega ou quando a semana já passou. Na Semana a busca é sempre pela semana mostrada, para
+// abrir outro dia só filtrar o que já veio.
+function useToFitItems(context: ToFitContext, day: string | undefined): { items?: ToFitItem[]; hasGrid: boolean } {
   const now = useNow()
   const today = toIsoDate(now)
   const week = useWeekParam(now)
-  const weekIso = day ?? week.iso
+  const weekIso = context === 'today' && day ? day : week.iso
   const progress = useWeekProgress(weekIso)
   const tasks = useTasks(1)
   const routine = useWeekRoutine(weekIso)
 
-  const weekIsOver = !day && toIsoDate(addDays(week.start, 6)) < today
+  const weekIsOver = context === 'week' && toIsoDate(addDays(week.start, 6)) < today
   if (weekIsOver || !progress.isSuccess || !tasks.isSuccess || !routine.isSuccess) return { hasGrid: false }
   const days = (routine.data.days ?? []) as PlannedDay[]
   const items = toFitItems(progress.data, tasks.data.data ?? [], days, today)
-  const hasGrid = days.some((planned) => (planned.blocks ?? []).length > 0)
-  if (!day) return { items, hasGrid }
-  return { items: items.flatMap((item) => (item.dates.includes(day) ? [{ ...item, dates: [day] }] : [])), hasGrid }
+  return { items: toFitOn(items, day), hasGrid: days.some((planned) => (planned.blocks ?? []).length > 0) }
 }
 
 type ToFitRowProps = {

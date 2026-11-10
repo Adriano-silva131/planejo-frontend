@@ -11,7 +11,7 @@ export function TodayRoute() {
     <TodayPage
       aside={
         <>
-          <ToFitCard day={today} />
+          <ToFitCard context="today" day={today} />
           <UpcomingCard />
           <WeekRhythmCard />
         </>
