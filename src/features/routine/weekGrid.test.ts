@@ -68,6 +68,18 @@ describe('layoutDay', () => {
     expect(Math.max(...placed.map((item) => item.lane))).toBe(3)
   })
 
+  it('põe lado a lado os que começam a menos de 30 minutos um do outro', () => {
+    const placed = layoutDay([block('livro', '18:45', '19:45'), block('faculdade', '19:00', '19:45'), block('olist', '09:00', '18:00')], range)
+    const sides = Object.fromEntries(placed.map((item) => [item.block.title, item.side]))
+    expect(sides).toEqual({ olist: undefined, livro: 'left', faculdade: 'right' })
+  })
+
+  it('mantém a cascata quando o de baixo começa bem antes', () => {
+    const placed = layoutDay([block('olist', '09:00', '18:00'), block('almoço', '12:00', '13:00'), block('reunião', '09:15', '09:45')], range)
+    expect(placed.find((item) => item.block.title === 'almoço')?.side).toBeUndefined()
+    expect(placed.find((item) => item.block.title === 'reunião')?.side).toBe('right')
+  })
+
   it('corta o que passa da faixa visível e garante ao menos uma linha', () => {
     const placed = layoutDay([block('a', '21:30', '24:00'), block('b', '08:00', '08:02')], range)
     const byTitle = (title: string) => placed.find((item) => item.block.title === title)

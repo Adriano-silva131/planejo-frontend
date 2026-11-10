@@ -14,7 +14,12 @@ export type PlacedBlock = {
   // Ordem de empilhamento: maior que a de todo bloco anterior com que se sobrepõe, até maxLanes - 1.
   layer: number
   overlaps: boolean
+  // Lado a lado em vez de cascata: metade esquerda para o de baixo, direita para o de cima.
+  side?: 'left' | 'right'
 }
+
+// Abaixo disso de diferença entre os começos, o bloco de cima cobriria o título do de baixo.
+const titleMinutes = 30
 
 const defaultRange: HourRange = { startHour: 7, endHour: 22 }
 
@@ -49,12 +54,19 @@ export function rowPlacement(start: number, end: number, range: HourRange) {
 
 // Blocos sobrepostos entram em cascata: cada faixa nova começa um pouco mais à direita, para o bloco de baixo
 // manter a largura e o título visíveis. Os que não se sobrepõem ocupam o dia todo. O que começa depois fica por
-// cima, mesmo quando reaproveita uma faixa livre. Começos iguais deixam o mais longo embaixo.
+// cima, mesmo quando reaproveita uma faixa livre. Começos iguais deixam o mais longo embaixo. Dois blocos que
+// começam quase juntos ficam lado a lado, porque na cascata o de cima taparia o título do de baixo.
 export function layoutDay(blocks: RoutineBlock[], range: HourRange): PlacedBlock[] {
-  const laneEnds: number[] = []
   const spans = blocks
     .map((block) => ({ block, ...clampSpan(block, range) }))
     .sort((a, b) => a.start - b.start || b.end - a.end)
+  return markSideBySide(cascade(spans, range), spans)
+}
+
+type Span = { block: RoutineBlock; start: number; end: number }
+
+function cascade(spans: Span[], range: HourRange): PlacedBlock[] {
+  const laneEnds: number[] = []
   const layers: number[] = []
   return spans.map(({ block, start, end }, index) => {
     const free = laneEnds.findIndex((laneEnd) => laneEnd <= start)
@@ -70,6 +82,19 @@ export function layoutDay(blocks: RoutineBlock[], range: HourRange): PlacedBlock
       ...rowPlacement(start, end, range),
     }
   })
+}
+
+function markSideBySide(placed: PlacedBlock[], spans: Span[]) {
+  spans.forEach((later, index) => {
+    const lower = spans.findIndex(
+      (earlier, earlierIndex) =>
+        earlierIndex < index && earlier.end > later.start && later.start - earlier.start < titleMinutes && placed[earlierIndex].lane === 0,
+    )
+    if (lower === -1 || placed[index].lane !== 1) return
+    placed[lower].side = 'left'
+    placed[index].side = 'right'
+  })
+  return placed
 }
 
 function clampSpan(block: RoutineBlock, range: HourRange) {
