@@ -9,7 +9,7 @@ export function toTaskPayload(values: TaskFormValues): TaskFields {
   if (values.kind === 'fixed') {
     return { ...base, weekdays: values.weekdays, start: values.start, end: values.end }
   }
-  if (values.oneOffMode === 'appointment') {
+  if (values.kind === 'one_off' && values.oneOffMode === 'appointment') {
     return { ...base, kind: 'fixed', date: values.date, start: values.start, end: values.end }
   }
   if (values.kind === 'recurring') {

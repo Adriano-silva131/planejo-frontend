@@ -56,6 +56,12 @@ describe('toTaskPayload', () => {
     expect(fromTask({ ...meta, ...toTaskPayload(values) })).toMatchObject({ kind: 'one_off', oneOffMode: 'appointment', date: '2026-10-30' })
   })
 
+  it('ignora o modo compromisso que sobrou ao trocar a pontual por recorrente', () => {
+    const values = form({ kind: 'recurring', oneOffMode: 'appointment', priority: 'low', timesPerWeek: '3', durationHours: '1', start: '09:00', end: '10:00' })
+    expect(toTaskPayload(values)).toMatchObject({ kind: 'recurring', timesPerWeek: 3, durationMinutes: 60 })
+    expect(toTaskPayload(values)).not.toHaveProperty('date')
+  })
+
   it('soma horas e minutos e omite período vazio', () => {
     const values = form({
       kind: 'recurring',
