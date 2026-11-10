@@ -11,6 +11,15 @@ describe('blockSize', () => {
   })
 })
 
+describe('blockSize no dia aberto', () => {
+  it('a partir de 15 minutos cabe título e horário numa linha; a partir de 45, em duas', () => {
+    expect(blockSize(14, 'day')).toBe('tiny')
+    expect(blockSize(15, 'day')).toBe('line')
+    expect(blockSize(44, 'day')).toBe('line')
+    expect(blockSize(45, 'day')).toBe('stacked')
+  })
+})
+
 describe('extrasLabel', () => {
   it('diz o nome de um bloco junto e a contagem de mais de um', () => {
     expect(extrasLabel([{ title: 'Limpeza' }])).toBe('+ Limpeza')

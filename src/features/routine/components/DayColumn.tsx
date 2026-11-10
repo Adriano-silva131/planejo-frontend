@@ -66,6 +66,7 @@ function FullDayColumn({ day, week, range, today, now, onPlace, pending, mode, r
           dates={movableDates(week, item.block.taskId, day.date, today)}
           isPast={blockIsPast(item.block.end)}
           onOpenDay={() => onOpen(day.date)}
+          view={isOpen ? 'day' : 'week'}
         />
       ))}
       {showNow && <NowLine now={now} range={range} />}

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { joinClasses } from '@/shared/ui/joinClasses'
-import { blockSize } from '../blockFace'
+import { blockSize, roomySizes, type BlockView } from '../blockFace'
 import { slotMinutes, type PlacedBlock } from '../weekGrid'
 import { blockSession } from '../sessionForm'
 import { BlockFace } from './BlockFace'
@@ -22,18 +22,19 @@ export type PlannerBlockProps = {
   isPast: boolean
   // Etiqueta com outros blocos abre o dia, onde cada um aparece separado.
   onOpenDay: () => void
+  view: BlockView
 }
 
 // Sessão encaixada é um botão que abre a mudança de horário; etiqueta com outros blocos abre o dia; bloco de fixa só
 // mostra os detalhes.
-export function PlannerBlock({ placed, date, dates, isPast, onOpenDay }: PlannerBlockProps) {
+export function PlannerBlock({ placed, date, dates, isPast, onOpenDay, view }: PlannerBlockProps) {
   const { block, rowStart, rowSpan, lane, layer, overlaps, side, extras } = placed
-  const size = blockSize(rowSpan * slotMinutes)
+  const size = blockSize(rowSpan * slotMinutes, view)
   const [adjusting, setAdjusting] = useState(false)
   const session = extras.length === 0 ? blockSession(block, date) : undefined
   const outerClasses = joinClasses(
     'group relative min-h-0 text-left outline-none',
-    size === 'regular' ? 'm-0.5' : 'mx-0.5 my-px',
+    roomySizes.includes(size) ? 'm-0.5' : 'mx-0.5 my-px',
     `row-start-${rowStart} row-span-${rowSpan}`,
     overlaps ? joinClasses(side ? sideClasses[side] : laneClasses[lane], layerClasses[layer]) : soloClasses,
   )

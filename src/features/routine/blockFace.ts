@@ -1,11 +1,20 @@
-// Abaixo de 45 minutos o bloco tem altura para uma linha só: sem respiro vertical e com entrelinha justa. Abaixo de
-// 30 nem a linha cabe: o bloco vira uma faixa na cor da área, e o título aparece só ao abrir.
-export type BlockSize = 'tiny' | 'short' | 'regular'
+// Na visão geral (36px por hora), abaixo de 45 minutos o bloco tem altura para uma linha só, e abaixo de 30 nem
+// ela cabe: vira uma faixa na cor da área, com o título só ao abrir. No dia aberto (72px por hora), de 15 a 44
+// minutos cabe título e horário numa linha; a partir de 45, em duas.
+export type BlockSize = 'tiny' | 'short' | 'regular' | 'line' | 'stacked'
+export type BlockView = 'week' | 'day'
 
-export function blockSize(minutes: number): BlockSize {
+export function blockSize(minutes: number, view: BlockView = 'week'): BlockSize {
+  if (view === 'day') {
+    if (minutes < 15) return 'tiny'
+    return minutes < 45 ? 'line' : 'stacked'
+  }
   if (minutes < 30) return 'tiny'
   return minutes < 45 ? 'short' : 'regular'
 }
+
+// Tamanhos com respiro vertical: o resto encosta nas bordas para caber a linha.
+export const roomySizes: BlockSize[] = ['regular', 'stacked']
 
 // Com o mouse em cima ou com foco (toque, Tab), o bloco cresce para baixo por cima da grade e mostra o texto inteiro,
 // sem mover o layout. A borda na cor da grade separa o bloco aberto do que ficou embaixo.
