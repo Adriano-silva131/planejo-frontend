@@ -36,3 +36,21 @@ export function daysLeftLabel(days: number) {
   if (days === 1) return 'amanhã'
   return `em ${days} dias`
 }
+
+// "na terça", "no sábado": o dia da semana com a preposição certa.
+export function weekdayIn(date: Date) {
+  return `${isWeekend(date) ? 'no' : 'na'} ${shortWeekdayName(date)}`
+}
+
+// "da terça", "do sábado".
+export function weekdayOf(date: Date) {
+  return `${isWeekend(date) ? 'do' : 'da'} ${shortWeekdayName(date)}`
+}
+
+function shortWeekdayName(date: Date) {
+  return deadlineWeekday.format(date).replace('-feira', '')
+}
+
+function isWeekend(date: Date) {
+  return date.getDay() === 0 || date.getDay() === 6
+}

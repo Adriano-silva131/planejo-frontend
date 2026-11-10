@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { toIsoDate } from './calendarDate'
-import { addDays, isSameWeek, startOfWeek, weekDays, weekRangeLabel } from './week'
+import { addDays, dateInWeek, isSameWeek, startOfWeek, weekDays, weekRangeLabel } from './week'
 
 describe('startOfWeek', () => {
   it('volta para a segunda-feira', () => {
@@ -34,5 +34,17 @@ describe('isSameWeek', () => {
   it('compara pela segunda-feira', () => {
     expect(isSameWeek(new Date(2026, 9, 26), new Date(2026, 10, 1))).toBe(true)
     expect(isSameWeek(new Date(2026, 9, 26), addDays(new Date(2026, 10, 1), 1))).toBe(false)
+  })
+})
+
+describe('dateInWeek', () => {
+  const monday = new Date(2026, 10, 9)
+
+  it('aceita só um dos sete dias da semana', () => {
+    expect(dateInWeek('2026-11-10', monday)).toBe('2026-11-10')
+    expect(dateInWeek('2026-11-15', monday)).toBe('2026-11-15')
+    expect(dateInWeek('2026-11-16', monday)).toBeUndefined()
+    expect(dateInWeek('terça', monday)).toBeUndefined()
+    expect(dateInWeek(null, monday)).toBeUndefined()
   })
 })

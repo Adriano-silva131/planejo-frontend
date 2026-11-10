@@ -1,7 +1,7 @@
-import { useSearchParams } from 'react-router'
 import { fromIsoDate } from '@/shared/time/calendarDate'
 import { longDateLabel, weekdayInitial } from '@/shared/time/dateLabels'
 import { timeOfDayLabel } from '@/shared/time/timeOfDay'
+import { useDayParam } from '@/shared/time/useDayParam'
 import { joinClasses } from '@/shared/ui/joinClasses'
 import type { PlannedDay } from '../api/routineTypes'
 import { dayItems } from '../dayItems'
@@ -14,14 +14,9 @@ export type WeekDayViewProps = {
 }
 
 export function WeekDayView({ days, today }: WeekDayViewProps) {
-  const [params, setParams] = useSearchParams()
-  const selected = days.find((day) => day.date === params.get('dia')) ?? days.find((day) => day.date === today) ?? days[0]
-  const select = (date: string) =>
-    setParams((current) => {
-      const next = new URLSearchParams(current)
-      next.set('dia', date)
-      return next
-    })
+  const day = useDayParam(fromIsoDate(days[0].date))
+  const selected = days.find((item) => item.date === day.date) ?? days.find((item) => item.date === today) ?? days[0]
+  const select = day.open
 
   return (
     <div className="flex flex-col gap-5">

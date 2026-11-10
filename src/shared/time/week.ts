@@ -18,6 +18,13 @@ export function weekDays(start: Date) {
   return Array.from({ length: 7 }, (_, index) => addDays(start, index))
 }
 
+// A data ISO do parâmetro, se for um dos sete dias da semana que começa em start.
+export function dateInWeek(raw: string | null, start: Date) {
+  return weekDays(start)
+    .map(toIsoDate)
+    .find((date) => date === raw)
+}
+
 export function shortDateLabel(date: Date) {
   return shortDate.format(date).replace('.', '').replace(' de ', ' ')
 }
