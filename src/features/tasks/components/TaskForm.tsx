@@ -29,9 +29,10 @@ export function TaskForm({ task, onDone }: TaskFormProps) {
           {kind === 'recurring' && <RecurringFields form={form} />}
           {kind === 'one_off' && <OneOffFields form={form} />}
         </FormSection>
-        {alert && <FormAlert>{alert}</FormAlert>}
       </div>
-      <div className="px-5 pb-5 md:px-6 md:pb-6">
+      {/* No rodapé fixo o alerta fica à vista ao salvar, mesmo com o formulário rolado. */}
+      <div className="flex flex-col gap-4 px-5 pb-5 md:px-6 md:pb-6">
+        {alert && <FormAlert>{alert}</FormAlert>}
         <FormActions start={task && <DeleteTaskButton task={task} onDeleted={onDone} />}>
           <Button variant="ghost" onClick={onDone}>
             Cancelar

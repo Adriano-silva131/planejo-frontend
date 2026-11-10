@@ -1,6 +1,8 @@
 import { useLayoutEffect, useRef } from 'react'
+import { FormAlert } from '@/shared/ui/FormAlert'
 import { joinClasses } from '@/shared/ui/joinClasses'
 import type { PlannedDay } from '../api/routineTypes'
+import { useGridPlacement } from '../hooks/useGridPlacement'
 import { hourRow, initialScrollHour, rowCount, visibleHours, type HourRange } from '../weekGrid'
 import type { DayFree } from '../weekSummary'
 import { DayColumn } from './DayColumn'
@@ -21,6 +23,8 @@ export function WeekGrid({ days, free, today, now }: WeekGridProps) {
   const scrollHour = initialScrollHour(range, isCurrentWeek ? Math.floor(now / 60) : undefined)
   const weekStart = days[0]?.date
   const scrolledWeek = useRef<string>(undefined)
+  const placement = useGridPlacement()
+  const alert = placement.alert && days.some((day) => day.date === placement.alert?.date) ? placement.alert : undefined
 
   // Rola até perto da hora atual ao abrir ou trocar de semana; a virada de hora não tira o usuário de onde ele está.
   useLayoutEffect(() => {
@@ -32,7 +36,8 @@ export function WeekGrid({ days, free, today, now }: WeekGridProps) {
   }, [scrollHour, weekStart])
 
   return (
-    <div className="rounded-card bg-surface p-3">
+    <div className="flex flex-col gap-3 rounded-card bg-surface p-3">
+      {alert && <FormAlert onDismiss={placement.dismiss}>{alert.message}</FormAlert>}
       <div ref={scroller} className="relative planner-viewport overflow-y-auto overscroll-contain">
         <div ref={header} className="sticky top-0 z-60 flex gap-1 bg-surface">
           <div className="w-10 shrink-0" />
@@ -43,7 +48,16 @@ export function WeekGrid({ days, free, today, now }: WeekGridProps) {
         <div className="flex gap-1">
           <HourAxis range={range} />
           {days.map((day) => (
-            <DayColumn key={day.date} day={day} week={days} range={range} today={today} now={now} />
+            <DayColumn
+              key={day.date}
+              day={day}
+              week={days}
+              range={range}
+              today={today}
+              now={now}
+              onPlace={placement.place}
+              pending={placement.pendingDate === day.date}
+            />
           ))}
         </div>
       </div>

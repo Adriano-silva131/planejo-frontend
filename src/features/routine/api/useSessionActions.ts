@@ -18,7 +18,8 @@ function useSessionMutation<T>(request: (input: T) => Promise<unknown>) {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: request,
-    onSuccess: () => {
+    // Também no erro: um 409 pode vir do que mudou em outra aba, e mudar de dia pode falhar com o encaixe já feito.
+    onSettled: () => {
       void queryClient.invalidateQueries({ queryKey: ['routine'] })
     },
   })

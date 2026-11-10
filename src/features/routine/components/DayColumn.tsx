@@ -2,6 +2,7 @@ import { minutesOfDay } from '@/shared/time/timeOfDay'
 import { joinClasses } from '@/shared/ui/joinClasses'
 import type { PlannedDay } from '../api/routineTypes'
 import { useGridDrop } from '../hooks/useGridDrop'
+import type { PlaceInput } from '../hooks/useGridPlacement'
 import { movableDates } from '../sessionForm'
 import { hourRow, layoutDay, rowCount, rowPlacement, type HourRange } from '../weekGrid'
 import { freeStretch } from '../weekSummary'
@@ -14,15 +15,19 @@ export type DayColumnProps = {
   range: HourRange
   today: string
   now: number
+  // Encaixa a atividade solta na coluna; pending enquanto o encaixe neste dia não termina.
+  onPlace: (input: PlaceInput) => void
+  pending: boolean
 }
 
-export function DayColumn({ day, week, range, today, now }: DayColumnProps) {
+export function DayColumn({ day, week, range, today, now, onPlace, pending }: DayColumnProps) {
   const { isToday, isPast, stretch, showNow, blockIsPast } = columnState(day, range, today, now)
-  const drop = useGridDrop(day.date, range, !isPast)
+  const drop = useGridDrop({ date: day.date, range, enabled: !isPast, onPlace })
 
   return (
     <div
       {...drop.handlers}
+      aria-busy={pending || undefined}
       className={joinClasses(
         'grid flex-1 grid-cols-8 planner-rows',
         isToday && 'rounded-b-control border-x border-b border-action/50',
@@ -44,11 +49,6 @@ export function DayColumn({ day, week, range, today, now }: DayColumnProps) {
         />
       ))}
       {showNow && <NowLine now={now} range={range} />}
-      {drop.failed && (
-        <p role="alert" className="sr-only">
-          Não deu para encaixar a tarefa.
-        </p>
-      )}
     </div>
   )
 }

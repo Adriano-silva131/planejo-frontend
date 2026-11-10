@@ -1,9 +1,8 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { ApiError } from '@/shared/api/apiError'
 import { useMoveSession, usePlaceSession, useRemoveSession } from '../api/useSessionActions'
-import { sessionDefaults, sessionFormSchema, type PlacedSession, type SessionFormValues, type SessionTask } from '../sessionForm'
+import { sessionDefaults, sessionErrorMessage, sessionFormSchema, type PlacedSession, type SessionFormValues, type SessionTask } from '../sessionForm'
 
 export type SessionFormOptions = {
   task: SessionTask
@@ -21,7 +20,7 @@ export function useSessionForm({ task, dates, current, onDone }: SessionFormOpti
 
   const handlers = {
     onSuccess: onDone,
-    onError: (error: Error) => setAlert(error instanceof ApiError ? error.message : 'Não deu para salvar agora. Tente de novo.'),
+    onError: (error: Error) => setAlert(sessionErrorMessage(error, 'Não deu para salvar agora. Tente de novo.')),
   }
 
   const submit = form.handleSubmit(({ date, start, end }) => {

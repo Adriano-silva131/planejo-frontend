@@ -13,3 +13,10 @@ export class ApiError extends Error {
     this.fields = fields
   }
 }
+
+// O backend recusa o que deixaria mais de duas coisas no mesmo horário; a mensagem já cita o dia e as tarefas.
+export const scheduleOverlapCode = 'schedule_overlap'
+
+export function isScheduleOverlap(error: unknown) {
+  return error instanceof ApiError && error.code === scheduleOverlapCode
+}

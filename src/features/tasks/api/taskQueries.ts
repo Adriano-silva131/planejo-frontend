@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query'
 import { apiDelete, apiGet, apiPost, apiPut } from '@/shared/api/apiClient'
+import { isScheduleOverlap } from '@/shared/api/apiError'
 import type { components } from '@/shared/api/schema'
 import type { AreaColor, Task, TaskFields, TaskPage } from './taskTypes'
 
@@ -55,6 +56,10 @@ export function useSaveTask(id?: string) {
     onSuccess: (task) => {
       queryClient.setQueryData(taskKeys.detail(task.id), task)
       invalidatePlanning(queryClient)
+    },
+    // Recusada por horário cheio: a rotina pode estar desatualizada, se o conflito veio de outra aba.
+    onError: (error) => {
+      if (isScheduleOverlap(error)) void queryClient.invalidateQueries({ queryKey: ['routine'] })
     },
   })
 }

@@ -88,7 +88,7 @@ function ToFitRow({ item, draggable }: ToFitRowProps) {
   return (
     <li
       draggable={draggable && canPlace}
-      onDragStart={draggable && canPlace ? (event) => startTaskDrag(event, { taskId: item.task.taskId, minutes: item.minutes }) : undefined}
+      onDragStart={draggable && canPlace ? (event) => startTaskDrag(event, { taskId: item.task.taskId, minutes: item.minutes, dates: item.dates }) : undefined}
       data-category={areaCategoryId(item.area)}
       className={joinClasses('flex items-center gap-3 rounded-control bg-surface-alt py-1 pl-3', draggable && canPlace && 'cursor-grab')}
     >

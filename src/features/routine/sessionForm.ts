@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { ApiError } from '@/shared/api/apiError'
 import { minutesInDay, timeOfDayLabel } from '@/shared/time/timeOfDay'
 import type { PlannedBlock, PlannedDay } from './api/routineTypes'
 
@@ -55,4 +56,9 @@ export function movableDates(days: PlannedDay[], taskId: string, date: string, t
   return days
     .filter((day) => day.date === date || (day.date >= today && !(day.blocks ?? []).some((block) => block.taskId === taskId)))
     .map((day) => day.date)
+}
+
+// A mensagem da API diz o que impediu o encaixe, como o horário já ocupado por duas coisas.
+export function sessionErrorMessage(error: unknown, fallback: string) {
+  return error instanceof ApiError ? error.message : fallback
 }
