@@ -15,7 +15,9 @@ export function AreaLegend({ areas }: AreaLegendProps) {
         </li>
       ))}
       <li className="flex items-center gap-1.5">
-        <Lock aria-hidden="true" className="size-3.5" />
+        <span aria-hidden="true" className="flex size-3.5 items-center justify-center rounded-control bg-surface-alt fixed-hatch text-ink">
+          <Lock className="size-2.5" />
+        </span>
         Horário fixo
       </li>
     </ul>

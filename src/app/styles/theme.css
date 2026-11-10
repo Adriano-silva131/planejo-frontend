@@ -80,3 +80,8 @@
 @utility past-hatch {
   background-image: repeating-linear-gradient(135deg, var(--color-line) 0 1px, transparent 1px 8px);
 }
+
+/* Tarefa fixa na grade: listras finas na cor do texto da área, sobre o fundo da área, nos dois temas. */
+@utility fixed-hatch {
+  background-image: repeating-linear-gradient(135deg, color-mix(in oklab, currentColor 12%, transparent) 0 1px, transparent 1px 8px);
+}

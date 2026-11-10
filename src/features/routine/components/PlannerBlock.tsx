@@ -88,6 +88,7 @@ function BlockFace({ block, size, dimmed, raised, editable }: BlockFaceProps) {
       className={joinClasses(
         'absolute inset-x-0 top-0 flex h-full flex-col gap-0.5 overflow-hidden rounded-control bg-hue px-2 text-on-hue',
         faceSizeClasses[size],
+        block.taskKind === 'fixed' && 'fixed-hatch',
         expandedFaceClasses,
         dimmed && 'opacity-50',
         raised && 'ring-2 ring-surface',
@@ -98,7 +99,7 @@ function BlockFace({ block, size, dimmed, raised, editable }: BlockFaceProps) {
       </span>
       <span className="hidden type-meta tabular-nums group-hover:block group-focus:block">{blockTimeLabel(block)}</span>
       {block.adjusted && <span className="hidden type-meta opacity-80 group-hover:block group-focus:block">Ajustado neste dia</span>}
-      <span className="sr-only">{`${size === 'tiny' ? `${block.title}, ` : ''}${block.area}, ${blockTimeLabel(block)}${editable ? '. Mudar' : ''}`}</span>
+      <span className="sr-only">{`${size === 'tiny' ? `${block.title}, ` : ''}${block.area}, ${blockTimeLabel(block)}${block.taskKind === 'fixed' ? ', horário fixo' : ''}${editable ? '. Mudar' : ''}`}</span>
     </span>
   )
 }

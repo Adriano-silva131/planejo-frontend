@@ -47,6 +47,13 @@ function dragData(allowed: string[]) {
   return { types: Object.keys(data), getData: (type: string) => data[type] ?? '' }
 }
 
+describe('WeekGrid', () => {
+  it('diz ao leitor de tela que a tarefa fixa tem horário fixo', () => {
+    renderGrid()
+    expect(screen.getAllByText(/Trabalho, .*horário fixo/)).toHaveLength(7)
+  })
+})
+
 describe('WeekGrid: arrastar para encaixar', () => {
   beforeEach(() => {
     vi.mocked(apiPut).mockReset()
