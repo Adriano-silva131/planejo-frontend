@@ -11,3 +11,8 @@ export function blockSize(minutes: number): BlockSize {
 // sem mover o layout. A borda na cor da grade separa o bloco aberto do que ficou embaixo.
 export const expandedFaceClasses =
   'group-hover:h-auto group-hover:min-h-full group-hover:opacity-100 group-hover:ring-2 group-hover:ring-surface group-focus:h-auto group-focus:min-h-full group-focus:opacity-100 group-focus:ring-2 group-focus:ring-surface group-focus-visible:outline-2 group-focus-visible:outline-action'
+
+// Os blocos que entraram na etiqueta de outro: o nome quando é um só, a contagem quando são mais.
+export function extrasLabel(extras: { title: string }[]) {
+  return extras.length === 1 ? `+ ${extras[0].title}` : `+ ${extras.length}`
+}

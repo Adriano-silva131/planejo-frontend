@@ -19,11 +19,11 @@ const today = '2026-11-10'
 const now = 8 * 60
 const overlap = 'Nesse horário já há duas tarefas: Olist e Almoço (qua 11/11, 12:00–13:00).'
 
-function renderGrid() {
-  const free = days.map((day) => dayFree(day, visibleHours(days), today, now))
+function renderGrid(week = days) {
+  const free = week.map((day) => dayFree(day, visibleHours(week), today, now))
   const { container } = render(
     <QueryClientProvider client={new QueryClient()}>
-      <WeekGrid days={days} free={free} today={today} now={now} />
+      <WeekGrid days={week} free={free} today={today} now={now} />
     </QueryClientProvider>,
   )
   // A primeira grade de linhas é o eixo das horas; as outras são os dias, na ordem da semana.
@@ -51,6 +51,14 @@ describe('WeekGrid', () => {
   it('diz ao leitor de tela que a tarefa fixa tem horário fixo', () => {
     renderGrid()
     expect(screen.getAllByText(/Trabalho, .*horário fixo/)).toHaveLength(7)
+  })
+
+  it('junta na visão geral os blocos que começam juntos, com o outro no texto', () => {
+    const limpeza = { ...olist, ...flags, taskId: 'limpeza', title: 'Limpeza', area: 'Casa', taskKind: 'recurring' as const, start: '19:00', end: '19:30' }
+    const faculdade = { ...olist, ...flags, taskId: 'faculdade', title: 'Faculdade', area: 'Estudos', taskKind: 'recurring' as const, start: '19:00', end: '20:00' }
+    renderGrid(days.map((day, index) => (index === 1 ? { ...day, blocks: [...(day.blocks ?? []), limpeza, faculdade] } : day)))
+    expect(screen.getByText('+ Limpeza')).toBeTruthy()
+    expect(screen.getByText(/^Faculdade, Estudos, 19:00–20:00; também Limpeza, 19:00–19:30$/)).toBeTruthy()
   })
 })
 

@@ -80,6 +80,25 @@ describe('layoutDay', () => {
     expect(placed.find((item) => item.block.title === 'reunião')?.side).toBe('right')
   })
 
+  it('na visão geral junta numa etiqueta os que começam a menos de 30 minutos, e mantém a cascata do resto', () => {
+    const blocks = [block('olist', '09:00', '18:00'), block('almoço', '12:00', '13:00'), block('limpeza', '19:00', '19:30'), block('faculdade', '19:00', '20:00')]
+    const placed = layoutDay(blocks, range, 'overview')
+    expect(placed.map((item) => [item.block.title, item.extras.map((extra) => extra.title), item.layer])).toEqual([
+      ['olist', [], 0],
+      ['almoço', [], 1],
+      ['faculdade', ['limpeza'], 0],
+    ])
+    expect(placed[2]).toMatchObject({ rowStart: hourRow(19, range), rowSpan: 12, overlaps: false })
+  })
+
+  it('no dia aberto não junta: os que começam juntos ficam lado a lado', () => {
+    const placed = layoutDay([block('limpeza', '19:00', '19:30'), block('faculdade', '19:00', '20:00')], range)
+    expect(placed.map((item) => [item.block.title, item.side, item.extras.length])).toEqual([
+      ['faculdade', 'left', 0],
+      ['limpeza', 'right', 0],
+    ])
+  })
+
   it('corta o que passa da faixa visível e garante ao menos uma linha', () => {
     const placed = layoutDay([block('a', '21:30', '24:00'), block('b', '08:00', '08:02')], range)
     const byTitle = (title: string) => placed.find((item) => item.block.title === title)

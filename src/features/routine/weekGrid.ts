@@ -16,7 +16,12 @@ export type PlacedBlock = {
   overlaps: boolean
   // Lado a lado em vez de cascata: metade esquerda para o de baixo, direita para o de cima.
   side?: 'left' | 'right'
+  // Na visão geral, blocos que começam junto com este e entram na mesma etiqueta.
+  extras: RoutineBlock[]
 }
+
+// Visão geral resume a semana em colunas estreitas; o dia aberto mostra cada bloco.
+export type LayoutMode = 'overview' | 'detail'
 
 // Abaixo disso de diferença entre os começos, o bloco de cima cobriria o título do de baixo.
 const titleMinutes = 30
@@ -55,20 +60,37 @@ export function rowPlacement(start: number, end: number, range: HourRange) {
 // Blocos sobrepostos entram em cascata: cada faixa nova começa um pouco mais à direita, para o bloco de baixo
 // manter a largura e o título visíveis. Os que não se sobrepõem ocupam o dia todo. O que começa depois fica por
 // cima, mesmo quando reaproveita uma faixa livre. Começos iguais deixam o mais longo embaixo. Dois blocos que
-// começam quase juntos ficam lado a lado, porque na cascata o de cima taparia o título do de baixo.
-export function layoutDay(blocks: RoutineBlock[], range: HourRange): PlacedBlock[] {
-  const spans = blocks
-    .map((block) => ({ block, ...clampSpan(block, range) }))
+// começam quase juntos ficam lado a lado, porque na cascata o de cima taparia o título do de baixo; na visão geral,
+// viram uma etiqueta só.
+export function layoutDay(blocks: RoutineBlock[], range: HourRange, mode: LayoutMode = 'detail'): PlacedBlock[] {
+  const sorted = blocks
+    .map((block) => ({ block, ...clampSpan(block, range), extras: [] }))
     .sort((a, b) => a.start - b.start || b.end - a.end)
+  const spans = mode === 'overview' ? mergeCloseStarts(sorted) : sorted
   return markSideBySide(cascade(spans, range), spans)
 }
 
-type Span = { block: RoutineBlock; start: number; end: number }
+export type Span = { block: RoutineBlock; start: number; end: number; extras: RoutineBlock[] }
+
+// Junta, em ordem de começo, quem começa menos de 30 minutos depois do primeiro do grupo e se sobrepõe a ele. O
+// grupo cobre a união dos trechos e fica com o título do primeiro (no mesmo começo, o mais longo).
+export function mergeCloseStarts(spans: Span[]): Span[] {
+  const groups: Span[] = []
+  for (const span of spans) {
+    const last = groups.at(-1)
+    if (last && span.start - last.start < titleMinutes && span.start < last.end) {
+      groups[groups.length - 1] = { ...last, end: Math.max(last.end, span.end), extras: [...last.extras, span.block] }
+    } else {
+      groups.push(span)
+    }
+  }
+  return groups
+}
 
 function cascade(spans: Span[], range: HourRange): PlacedBlock[] {
   const laneEnds: number[] = []
   const layers: number[] = []
-  return spans.map(({ block, start, end }, index) => {
+  return spans.map(({ block, start, end, extras }, index) => {
     const free = laneEnds.findIndex((laneEnd) => laneEnd <= start)
     const lane = free === -1 ? Math.min(laneEnds.length, maxLanes - 1) : free
     laneEnds[lane] = Math.max(laneEnds[lane] ?? 0, end)
@@ -78,6 +100,7 @@ function cascade(spans: Span[], range: HourRange): PlacedBlock[] {
       block,
       lane,
       layer: layers[index],
+      extras,
       overlaps: spans.some((other, otherIndex) => otherIndex !== index && other.start < end && start < other.end),
       ...rowPlacement(start, end, range),
     }

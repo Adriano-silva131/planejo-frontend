@@ -1,11 +1,9 @@
 import { useState } from 'react'
-import { areaCategoryId } from '@/shared/theme/areaColors'
 import { joinClasses } from '@/shared/ui/joinClasses'
-import type { PlannedBlock } from '../api/routineTypes'
-import { blockSize, expandedFaceClasses, type BlockSize } from '../blockFace'
-import { blockMinutes, blockTimeLabel } from '../blockTime'
-import type { PlacedBlock } from '../weekGrid'
+import { blockSize } from '../blockFace'
+import { slotMinutes, type PlacedBlock } from '../weekGrid'
 import { blockSession } from '../sessionForm'
+import { BlockFace } from './BlockFace'
 import { SessionDialog } from './SessionDialog'
 
 const laneClasses = ['col-span-full', 'col-start-2 col-span-7', 'col-start-3 col-span-6', 'col-start-4 col-span-5']
@@ -24,19 +22,20 @@ export type PlannerBlockProps = {
   isPast: boolean
 }
 
-// Sessão encaixada é um botão que abre a mudança de horário; bloco de fixa só mostra os detalhes.
+// Sessão encaixada é um botão que abre a mudança de horário; bloco de fixa e etiqueta com outros blocos só mostram
+// os detalhes.
 export function PlannerBlock({ placed, date, dates, isPast }: PlannerBlockProps) {
-  const { block, rowStart, rowSpan, lane, layer, overlaps, side } = placed
-  const size = blockSize(blockMinutes(block))
+  const { block, rowStart, rowSpan, lane, layer, overlaps, side, extras } = placed
+  const size = blockSize(rowSpan * slotMinutes)
   const [adjusting, setAdjusting] = useState(false)
-  const session = blockSession(block, date)
+  const session = extras.length === 0 ? blockSession(block, date) : undefined
   const outerClasses = joinClasses(
     'group relative min-h-0 text-left outline-none',
     size === 'regular' ? 'm-0.5' : 'mx-0.5 my-px',
     `row-start-${rowStart} row-span-${rowSpan}`,
     overlaps ? joinClasses(side ? sideClasses[side] : laneClasses[lane], layerClasses[layer]) : soloClasses,
   )
-  const face = <BlockFace block={block} size={size} dimmed={isPast} raised={overlaps && layer > 0 && !side} editable={!!session} />
+  const face = <BlockFace block={block} extras={extras} size={size} dimmed={isPast} raised={overlaps && layer > 0 && !side} editable={!!session} />
 
   if (!session) {
     return (
@@ -58,48 +57,5 @@ export function PlannerBlock({ placed, date, dates, isPast }: PlannerBlockProps)
         onClose={() => setAdjusting(false)}
       />
     </>
-  )
-}
-
-type BlockFaceProps = {
-  block: PlannedBlock
-  size: BlockSize
-  dimmed: boolean
-  raised: boolean
-  editable: boolean
-}
-
-const faceSizeClasses: Record<BlockSize, string> = {
-  tiny: 'py-0 group-hover:py-1 group-focus:py-1',
-  short: 'justify-center py-0',
-  regular: 'py-1',
-}
-
-const titleSizeClasses: Record<BlockSize, string> = {
-  tiny: 'hidden leading-tight group-hover:block group-focus:block',
-  short: 'leading-tight',
-  regular: '',
-}
-
-function BlockFace({ block, size, dimmed, raised, editable }: BlockFaceProps) {
-  return (
-    <span
-      data-category={areaCategoryId(block.area)}
-      className={joinClasses(
-        'absolute inset-x-0 top-0 flex h-full flex-col gap-0.5 overflow-hidden rounded-control bg-hue px-2 text-on-hue',
-        faceSizeClasses[size],
-        block.taskKind === 'fixed' && 'fixed-hatch',
-        expandedFaceClasses,
-        dimmed && 'opacity-50',
-        raised && 'ring-2 ring-surface',
-      )}
-    >
-      <span className={joinClasses('truncate type-meta font-bold group-hover:whitespace-normal group-focus:whitespace-normal', titleSizeClasses[size])}>
-        {block.title}
-      </span>
-      <span className="hidden type-meta tabular-nums group-hover:block group-focus:block">{blockTimeLabel(block)}</span>
-      {block.adjusted && <span className="hidden type-meta opacity-80 group-hover:block group-focus:block">Ajustado neste dia</span>}
-      <span className="sr-only">{`${size === 'tiny' ? `${block.title}, ` : ''}${block.area}, ${blockTimeLabel(block)}${block.taskKind === 'fixed' ? ', horário fixo' : ''}${editable ? '. Mudar' : ''}`}</span>
-    </span>
   )
 }

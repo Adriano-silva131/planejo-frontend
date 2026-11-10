@@ -39,7 +39,7 @@ export function DayColumn({ day, week, range, today, now, onPlace, pending }: Da
         <div key={hour} aria-hidden="true" className={joinClasses('col-span-full border-t border-line', `row-start-${hourRow(hour, range)} row-span-24`)} />
       ))}
       {stretch && <FreeStretchLabel start={stretch.start} end={stretch.end} label={stretch.label} range={range} />}
-      {layoutDay(day.blocks ?? [], range).map((item) => (
+      {layoutDay(day.blocks ?? [], range, 'overview').map((item) => (
         <PlannerBlock
           key={`${item.block.taskId}-${item.block.start}`}
           placed={item}
