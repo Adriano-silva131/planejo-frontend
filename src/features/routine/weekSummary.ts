@@ -55,10 +55,14 @@ const minFreeLabel = 4 * 60
 
 export type FreeStretch = FreeGap & { label: string }
 
-// O maior trecho livre visível de um dia que ainda vem, quando for longo; o nome vem do meio do trecho.
+// O maior trecho livre visível de um dia que ainda vem, quando for longo; o nome vem do meio do trecho. Dia sem nada
+// marcado é todo "Livre", do que resta da faixa visível.
 export function freeStretch(day: PlannedDay, range: HourRange, from: number): FreeStretch | undefined {
-  if ((day.blocks ?? []).length === 0) return undefined
   const limit = range.endHour * 60
+  if ((day.blocks ?? []).length === 0) {
+    const start = Math.max(from, range.startHour * 60)
+    return start < limit ? { start, end: limit, label: 'Livre' } : undefined
+  }
   const visible = freeGaps(dayItems(day), Math.max(from, range.startHour * 60))
     .map((gap) => ({ start: gap.start, end: Math.min(gap.end, limit) }))
     .filter((gap) => gap.end - gap.start >= minFreeLabel)

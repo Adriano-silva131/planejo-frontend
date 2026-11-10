@@ -78,8 +78,13 @@ describe('freeStretch', () => {
     expect(freeStretch(wednesday, range, at('07:00'))).toEqual({ start: at('13:00'), end: at('19:00'), label: 'Tarde livre' })
   })
 
-  it('ignora dia vazio e trechos curtos', () => {
-    expect(freeStretch(sunday, range, 0)).toBeUndefined()
+  it('ignora trechos curtos', () => {
     expect(freeStretch(wednesday, range, at('16:00'))).toBeUndefined()
+  })
+
+  it('mostra o dia vazio como Livre no que resta da faixa visível', () => {
+    expect(freeStretch(sunday, range, 0)).toEqual({ start: range.startHour * 60, end: range.endHour * 60, label: 'Livre' })
+    expect(freeStretch(sunday, range, at('20:00'))).toMatchObject({ start: at('20:00'), label: 'Livre' })
+    expect(freeStretch(sunday, range, range.endHour * 60)).toBeUndefined()
   })
 })
