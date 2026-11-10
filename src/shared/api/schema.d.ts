@@ -88,7 +88,10 @@ export interface paths {
         /** Lista as tarefas, da mais nova para a mais antiga */
         get: operations["list-tasks"];
         put?: never;
-        /** Cria uma tarefa */
+        /**
+         * Cria uma tarefa
+         * @description Tarefa fixa ocupa horário na rotina. No máximo duas coisas podem acontecer ao mesmo tempo: o que criaria uma terceira é recusado com 409 schedule_overlap.
+         */
         post: operations["create-task"];
         delete?: never;
         options?: never;
@@ -145,7 +148,10 @@ export interface paths {
         };
         /** Retorna uma tarefa */
         get: operations["get-task"];
-        /** Substitui os dados de uma tarefa */
+        /**
+         * Substitui os dados de uma tarefa
+         * @description Tarefa fixa ocupa horário na rotina. No máximo duas coisas podem acontecer ao mesmo tempo: o que criaria uma terceira é recusado com 409 schedule_overlap.
+         */
         put: operations["update-task"];
         post?: never;
         /** Apaga uma tarefa */
@@ -203,11 +209,14 @@ export interface paths {
         get?: never;
         /**
          * Ajusta uma ocorrência de uma tarefa fixa só neste dia
-         * @description Tira a ocorrência ou muda o horário dela, sem alterar a tarefa. Ajustar de novo substitui o ajuste anterior. Recorrentes e pontuais não têm ocorrências: use as sessões.
+         * @description Tira a ocorrência ou muda o horário dela, sem alterar a tarefa. Ajustar de novo substitui o ajuste anterior. Recorrentes e pontuais não têm ocorrências: use as sessões. No máximo duas coisas podem acontecer ao mesmo tempo: o que criaria uma terceira é recusado com 409 schedule_overlap.
          */
         put: operations["adjust-occurrence"];
         post?: never;
-        /** Volta a ocorrência ao padrão da tarefa */
+        /**
+         * Volta a ocorrência ao padrão da tarefa
+         * @description No máximo duas coisas podem acontecer ao mesmo tempo: o que criaria uma terceira é recusado com 409 schedule_overlap.
+         */
         delete: operations["reset-occurrence"];
         options?: never;
         head?: never;
@@ -224,7 +233,7 @@ export interface paths {
         get?: never;
         /**
          * Encaixa uma sessão de uma tarefa recorrente ou pontual num dia
-         * @description Reserva o horário na semana, em qualquer dia, sem alterar a tarefa. A tarefa tem no máximo uma sessão por dia: encaixar de novo no mesmo dia muda o horário. A sessão termina até a meia-noite.
+         * @description Reserva o horário na semana, em qualquer dia, sem alterar a tarefa. A tarefa tem no máximo uma sessão por dia: encaixar de novo no mesmo dia muda o horário. A sessão termina até a meia-noite. No máximo duas coisas podem acontecer ao mesmo tempo: o que criaria uma terceira é recusado com 409 schedule_overlap.
          */
         put: operations["place-session"];
         post?: never;
@@ -885,6 +894,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Unprocessable Entity */
             422: {
                 headers: {
@@ -1125,6 +1143,15 @@ export interface operations {
             };
             /** @description Not Found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Conflict */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -1490,6 +1517,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Unprocessable Entity */
             422: {
                 headers: {
@@ -1551,6 +1587,15 @@ export interface operations {
             };
             /** @description Not Found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Conflict */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -1625,6 +1670,15 @@ export interface operations {
             };
             /** @description Not Found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Conflict */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };
