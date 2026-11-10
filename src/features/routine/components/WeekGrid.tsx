@@ -34,7 +34,7 @@ export function WeekGrid({ days, free, today, now }: WeekGridProps) {
   return (
     <div className="rounded-card bg-surface p-3">
       <div ref={scroller} className="relative planner-viewport overflow-y-auto overscroll-contain">
-        <div ref={header} className="sticky top-0 z-50 flex gap-1 bg-surface">
+        <div ref={header} className="sticky top-0 z-60 flex gap-1 bg-surface">
           <div className="w-10 shrink-0" />
           {free.map((day) => (
             <WeekDayHeader key={day.date} free={day} isToday={day.date === today} />

@@ -39,10 +39,40 @@ describe('layoutDay', () => {
     expect(placed.map((item) => item.overlaps)).toEqual([true, true, false])
   })
 
+  it('empilha pelo começo: quem começa depois fica por cima, mesmo reaproveitando a faixa 0', () => {
+    const placed = layoutDay([block('a', '08:00', '10:00'), block('b', '09:00', '12:00'), block('c', '10:30', '11:00')], range)
+    expect(placed.map(({ block: { title }, lane, layer }) => [title, lane, layer])).toEqual([
+      ['a', 0, 0],
+      ['b', 1, 1],
+      ['c', 0, 2],
+    ])
+  })
+
+  it('mantém duas camadas para a Olist com Almoço e Lanche, e blocos encostados não se sobrepõem', () => {
+    const placed = layoutDay([block('olist', '09:00', '18:00'), block('almoço', '12:00', '13:00'), block('lanche', '13:00', '13:30')], range)
+    expect(placed.map((item) => item.layer)).toEqual([0, 1, 1])
+  })
+
+  it('ordena a entrada e, no mesmo começo, deixa o mais longo embaixo', () => {
+    const placed = layoutDay([block('almoço', '09:00', '10:00'), block('c', '11:00', '12:00'), block('olist', '09:00', '18:00')], range)
+    expect(placed.map((item) => [item.block.title, item.lane, item.layer])).toEqual([
+      ['olist', 0, 0],
+      ['almoço', 1, 1],
+      ['c', 1, 1],
+    ])
+  })
+
+  it('não passa da última camada com dados antigos empilhados', () => {
+    const placed = layoutDay(['a', 'b', 'c', 'd', 'e'].map((title) => block(title, '09:00', '10:00')), range)
+    expect(Math.max(...placed.map((item) => item.layer))).toBe(3)
+    expect(Math.max(...placed.map((item) => item.lane))).toBe(3)
+  })
+
   it('corta o que passa da faixa visível e garante ao menos uma linha', () => {
     const placed = layoutDay([block('a', '21:30', '24:00'), block('b', '08:00', '08:02')], range)
-    expect(placed[0]).toMatchObject({ rowStart: 175, rowSpan: 6 })
-    expect(placed[1].rowSpan).toBe(1)
+    const byTitle = (title: string) => placed.find((item) => item.block.title === title)
+    expect(byTitle('a')).toMatchObject({ rowStart: 175, rowSpan: 6 })
+    expect(byTitle('b')?.rowSpan).toBe(1)
   })
 })
 

@@ -11,6 +11,8 @@ export type PlacedBlock = {
   rowStart: number
   rowSpan: number
   lane: number
+  // Ordem de empilhamento: maior que a de todo bloco anterior com que se sobrepõe, até maxLanes - 1.
+  layer: number
   overlaps: boolean
 }
 
@@ -45,27 +47,36 @@ export function rowPlacement(start: number, end: number, range: HourRange) {
   }
 }
 
-// Blocos sobrepostos entram em cascata: cada faixa nova começa um pouco mais à direita e fica por cima,
-// para o bloco de baixo manter a largura e o título visíveis. Os que não se sobrepõem ocupam o dia todo.
+// Blocos sobrepostos entram em cascata: cada faixa nova começa um pouco mais à direita, para o bloco de baixo
+// manter a largura e o título visíveis. Os que não se sobrepõem ocupam o dia todo. O que começa depois fica por
+// cima, mesmo quando reaproveita uma faixa livre. Começos iguais deixam o mais longo embaixo.
 export function layoutDay(blocks: RoutineBlock[], range: HourRange): PlacedBlock[] {
   const laneEnds: number[] = []
-  const rangeStart = range.startHour * 60
-  const spans = blocks.map((block) => ({
-    start: Math.max(minutesOfDay(block.start), rangeStart),
-    end: Math.min(minutesOfDay(block.end), range.endHour * 60),
-  }))
-  return blocks.map((block, index) => {
-    const { start, end } = spans[index]
+  const spans = blocks
+    .map((block) => ({ block, ...clampSpan(block, range) }))
+    .sort((a, b) => a.start - b.start || b.end - a.end)
+  const layers: number[] = []
+  return spans.map(({ block, start, end }, index) => {
     const free = laneEnds.findIndex((laneEnd) => laneEnd <= start)
     const lane = free === -1 ? Math.min(laneEnds.length, maxLanes - 1) : free
     laneEnds[lane] = Math.max(laneEnds[lane] ?? 0, end)
+    const below = spans.slice(0, index).flatMap((other, otherIndex) => (other.end > start ? [layers[otherIndex] + 1] : []))
+    layers[index] = Math.min(Math.max(0, ...below), maxLanes - 1)
     return {
       block,
       lane,
+      layer: layers[index],
       overlaps: spans.some((other, otherIndex) => otherIndex !== index && other.start < end && start < other.end),
       ...rowPlacement(start, end, range),
     }
   })
+}
+
+function clampSpan(block: RoutineBlock, range: HourRange) {
+  return {
+    start: Math.max(minutesOfDay(block.start), range.startHour * 60),
+    end: Math.min(minutesOfDay(block.end), range.endHour * 60),
+  }
 }
 
 // Hora em que a grade abre: perto de agora na semana atual, ou no começo do dia útil nas outras.
