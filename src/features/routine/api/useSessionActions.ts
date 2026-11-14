@@ -1,5 +1,5 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { apiDelete, apiPut } from '@/shared/api/apiClient'
+import { useRoutineMutation } from './useRoutineMutation'
 
 export type SessionTarget = {
   taskId: string
@@ -14,25 +14,14 @@ export type SessionTimes = {
 
 const sessionPath = ({ taskId, date }: SessionTarget) => `/tasks/${taskId}/sessions/${date}`
 
-function useSessionMutation<T>(request: (input: T) => Promise<unknown>) {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: request,
-    // Também no erro: um 409 pode vir do que mudou em outra aba, e mudar de dia pode falhar com o encaixe já feito.
-    onSettled: () => {
-      void queryClient.invalidateQueries({ queryKey: ['routine'] })
-    },
-  })
-}
-
 export function usePlaceSession() {
-  return useSessionMutation(({ start, end, ...target }: SessionTarget & SessionTimes) =>
+  return useRoutineMutation(({ start, end, ...target }: SessionTarget & SessionTimes) =>
     apiPut(sessionPath(target), end ? { start, end } : { start }),
   )
 }
 
 export function useRemoveSession() {
-  return useSessionMutation((target: SessionTarget) => apiDelete(sessionPath(target)))
+  return useRoutineMutation((target: SessionTarget) => apiDelete(sessionPath(target)))
 }
 
 type MoveInput = SessionTimes & {
@@ -42,7 +31,7 @@ type MoveInput = SessionTimes & {
 
 // Mudar de dia encaixa no dia novo antes de tirar do antigo, para a sessão não sumir se a primeira chamada falhar.
 export function useMoveSession() {
-  return useSessionMutation(async ({ from, date, start, end }: MoveInput) => {
+  return useRoutineMutation(async ({ from, date, start, end }: MoveInput) => {
     await apiPut(sessionPath({ taskId: from.taskId, date }), end ? { start, end } : { start })
     if (date !== from.date) await apiDelete(sessionPath(from))
   })

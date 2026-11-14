@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { PlannedBlock, PlannedDay } from './api/routineTypes'
-import { dayFree, freeGapLabels, freeStretch, plannedByArea, todayFree, weekFreeMinutes } from './weekSummary'
+import { dayFree, freeGapLabels, freeStretch, todayFree } from './weekSummary'
 
 const range = { startHour: 7, endHour: 22 }
 const at = (time: string) => Number(time.slice(0, 2)) * 60 + Number(time.slice(3))
@@ -52,26 +52,6 @@ describe('todayFree', () => {
   })
 })
 
-describe('weekFreeMinutes', () => {
-  it('na semana atual soma só o que ainda vem', () => {
-    const days = [monday, wednesday].map((item) => dayFree(item, range, '2026-10-28', at('12:20')))
-    expect(weekFreeMinutes(days)).toBe(days[1].freeMinutes)
-  })
-
-  it('numa semana passada soma tudo', () => {
-    const days = [monday, wednesday].map((item) => dayFree(item, range, '2026-11-05', 0))
-    expect(weekFreeMinutes(days)).toBe(days[0].freeMinutes + days[1].freeMinutes)
-  })
-})
-
-describe('plannedByArea', () => {
-  it('soma por área, da maior para a menor', () => {
-    expect(plannedByArea([monday, wednesday])).toEqual([
-      { area: 'Alimentação', minutes: 120 },
-      { area: 'Estudos', minutes: 60 },
-    ])
-  })
-})
 
 describe('freeStretch', () => {
   it('nomeia o maior trecho livre pelo período do meio', () => {

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { RoutineBlock } from './api/routineTypes'
-import { blockMinutes, blockTimeLabel } from './blockTime'
+import { blockTimeLabel } from './blockTime'
 
 const base: RoutineBlock = {
   taskId: 't',
@@ -22,11 +22,5 @@ describe('blockTimeLabel', () => {
   it('avisa quando o bloco atravessa a meia-noite', () => {
     expect(blockTimeLabel({ ...base, continuesNextDay: true })).toBe('22:00 até amanhã')
     expect(blockTimeLabel({ ...base, start: '00:00', end: '02:00', continuesFromPreviousDay: true })).toBe('até 02:00')
-  })
-})
-
-describe('blockMinutes', () => {
-  it('conta a parte do bloco que cai no dia', () => {
-    expect(blockMinutes({ ...base, continuesNextDay: true })).toBe(120)
   })
 })

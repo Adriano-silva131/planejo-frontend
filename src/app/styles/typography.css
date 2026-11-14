@@ -59,6 +59,14 @@
   line-height: 1.4;
 }
 
+/* Texto de apoio nas colunas estreitas da Semana, onde type-meta não cabe. */
+@utility type-caption {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.35;
+}
+
 @utility type-eyebrow {
   font-family: var(--font-sans);
   font-size: 0.75rem;
