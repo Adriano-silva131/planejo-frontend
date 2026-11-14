@@ -18,7 +18,7 @@ export function WeekPage({ score, tray, dayTray, dayAside }: WeekPageProps) {
   return (
     <div className="flex flex-col gap-6 lg:gap-8">
       <title>Semana · Planejo</title>
-      <WeekHeader start={week.start} score={score} onPrevious={week.previous} onNext={week.next} onToday={week.today} />
+      <WeekHeader start={week.start} score={score} addDate={openDate} onPrevious={week.previous} onNext={week.next} onToday={week.today} />
       {routine.isPending && <TodaySkeleton />}
       {routine.isError && (
         <ErrorState title="Não deu para carregar a semana." error={routine.error} onRetry={() => void routine.refetch()} />

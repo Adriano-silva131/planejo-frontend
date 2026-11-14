@@ -1,6 +1,9 @@
+import { Plus } from 'lucide-react'
+import { useQuickAdd } from '@/shared/planning/quickAdd'
 import { fromIsoDate } from '@/shared/time/calendarDate'
 import { longDateLabel, weekdayInitial } from '@/shared/time/dateLabels'
 import { useDayParam } from '@/shared/time/useDayParam'
+import { Button } from '@/shared/ui/Button'
 import { joinClasses } from '@/shared/ui/joinClasses'
 import type { PlannedDay } from '../api/routineTypes'
 import { BoardDayColumn } from './BoardDayColumn'
@@ -16,6 +19,7 @@ export function WeekDayView({ days, today, now }: WeekDayViewProps) {
   const day = useDayParam(fromIsoDate(days[0].date))
   const selected = days.find((item) => item.date === day.date) ?? days.find((item) => item.date === today) ?? days[0]
   const select = day.open
+  const quickAdd = useQuickAdd()
 
   return (
     <div className="flex flex-col gap-5">
@@ -24,7 +28,15 @@ export function WeekDayView({ days, today, now }: WeekDayViewProps) {
           <DayButton key={day.date} day={day} isSelected={day.date === selected.date} isToday={day.date === today} onSelect={select} />
         ))}
       </div>
-      <h2 className="type-section first-letter:uppercase">{longDateLabel(fromIsoDate(selected.date))}</h2>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h2 className="type-section first-letter:uppercase">{longDateLabel(fromIsoDate(selected.date))}</h2>
+        {quickAdd && selected.date >= today && (
+          <Button variant="secondary" onClick={() => quickAdd({ date: selected.date })}>
+            <Plus aria-hidden="true" className="size-4" />
+            Adicionar
+          </Button>
+        )}
+      </div>
       <BoardDayColumn key={selected.date} day={selected} week={days} today={today} now={now} mode="single" />
     </div>
   )

@@ -1,7 +1,6 @@
-import { Plus } from 'lucide-react'
 import { longDateLabel } from '@/shared/time/dateLabels'
 import { minutesSinceMidnight, timeOfDayLabel } from '@/shared/time/timeOfDay'
-import { ButtonLink } from '@/shared/ui/ButtonLink'
+import { QuickAddButton } from '@/shared/planning/QuickAddButton'
 import { PageHeader } from '@/shared/ui/PageHeader'
 
 export type TodayHeaderProps = {
@@ -14,12 +13,7 @@ export function TodayHeader({ now, freeMinutes }: TodayHeaderProps) {
     <PageHeader
       eyebrow={`${longDateLabel(now)} · ${timeOfDayLabel(minutesSinceMidnight(now))}`}
       title={<FreeTimeTitle freeMinutes={freeMinutes} />}
-      actions={
-        <ButtonLink to="/atividades?atividade=nova" aria-label="Adicionar atividade">
-          <Plus aria-hidden="true" className="size-5" />
-          <span className="hidden sm:inline">Atividade</span>
-        </ButtonLink>
-      }
+      actions={<QuickAddButton />}
     />
   )
 }

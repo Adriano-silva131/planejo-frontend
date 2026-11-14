@@ -1,5 +1,6 @@
-import { X } from 'lucide-react'
+import { Plus, X } from 'lucide-react'
 import type { ReactNode } from 'react'
+import { useQuickAdd } from '@/shared/planning/quickAdd'
 import { fromIsoDate } from '@/shared/time/calendarDate'
 import { longDateLabel } from '@/shared/time/dateLabels'
 import { formatDuration } from '@/shared/time/timeOfDay'
@@ -18,6 +19,7 @@ export type OpenBoardDayHeaderProps = {
 // Ao abrir o dia, o foco vem para o título (useOpenDayFocus).
 export function OpenBoardDayHeader({ date, isToday, room, viewToggle, onClose }: OpenBoardDayHeaderProps) {
   const day = fromIsoDate(date)
+  const quickAdd = useQuickAdd()
   return (
     <div className="flex flex-wrap items-start justify-between gap-3">
       <div className="min-w-0">
@@ -38,6 +40,12 @@ export function OpenBoardDayHeader({ date, isToday, room, viewToggle, onClose }:
         )}
       </div>
       <div className="flex shrink-0 items-center gap-2">
+        {quickAdd && room !== undefined && (
+          <Button variant="secondary" onClick={() => quickAdd({ date })}>
+            <Plus aria-hidden="true" className="size-4" />
+            Adicionar
+          </Button>
+        )}
         {viewToggle}
         {onClose && (
           <Button variant="ghost" size="icon" aria-label={`Fechar ${longDateLabel(day)}`} onClick={onClose}>
