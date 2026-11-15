@@ -51,7 +51,6 @@ describe('WeekGrid: dia aberto', () => {
     expect(document.activeElement).toBe(screen.getByRole('heading', { name: /Ter.*10/ }))
     expect(screen.queryByText('+ Limpeza')).toBeNull()
     expect(screen.getByRole('button', { name: /^Limpeza, Estudos, 19:00–19:30/ })).toBeTruthy()
-    expect(screen.getByRole('link', { name: /Meu dia/ })).toBeTruthy()
   })
 
   it('fecha pelo botão e devolve o foco ao botão do dia', () => {

@@ -1,22 +1,25 @@
+import { Plus } from 'lucide-react'
+import { useQuickAdd } from '@/shared/planning/quickAdd'
 import { fromIsoDate } from '@/shared/time/calendarDate'
 import { longDateLabel, weekdayInitial } from '@/shared/time/dateLabels'
-import { timeOfDayLabel } from '@/shared/time/timeOfDay'
 import { useDayParam } from '@/shared/time/useDayParam'
+import { Button } from '@/shared/ui/Button'
 import { joinClasses } from '@/shared/ui/joinClasses'
 import type { PlannedDay } from '../api/routineTypes'
-import { dayItems } from '../dayItems'
-import { movableDates } from '../sessionForm'
-import { BlockRow } from './LaterItem'
+import { BoardDayColumn } from './BoardDayColumn'
 
 export type WeekDayViewProps = {
   days: PlannedDay[]
   today: string
+  now: number
 }
 
-export function WeekDayView({ days, today }: WeekDayViewProps) {
+// No celular, um dia por vez: o mesmo dia do quadro, escolhido na fileira da semana.
+export function WeekDayView({ days, today, now }: WeekDayViewProps) {
   const day = useDayParam(fromIsoDate(days[0].date))
   const selected = days.find((item) => item.date === day.date) ?? days.find((item) => item.date === today) ?? days[0]
   const select = day.open
+  const quickAdd = useQuickAdd()
 
   return (
     <div className="flex flex-col gap-5">
@@ -25,8 +28,16 @@ export function WeekDayView({ days, today }: WeekDayViewProps) {
           <DayButton key={day.date} day={day} isSelected={day.date === selected.date} isToday={day.date === today} onSelect={select} />
         ))}
       </div>
-      <h2 className="type-section first-letter:uppercase">{longDateLabel(fromIsoDate(selected.date))}</h2>
-      <DayBlocks day={selected} week={days} today={today} />
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h2 className="type-section first-letter:uppercase">{longDateLabel(fromIsoDate(selected.date))}</h2>
+        {quickAdd && selected.date >= today && (
+          <Button variant="secondary" onClick={() => quickAdd({ date: selected.date })}>
+            <Plus aria-hidden="true" className="size-4" />
+            Adicionar
+          </Button>
+        )}
+      </div>
+      <BoardDayColumn key={selected.date} day={selected} week={days} today={today} now={now} mode="single" />
     </div>
   )
 }
@@ -55,29 +66,5 @@ function DayButton({ day, isSelected, isToday, onSelect }: DayButtonProps) {
       <span>{weekdayInitial(date)}</span>
       <span className="type-label">{date.getDate()}</span>
     </button>
-  )
-}
-
-type DayBlocksProps = {
-  day: PlannedDay
-  week: PlannedDay[]
-  today: string
-}
-
-function DayBlocks({ day, week, today }: DayBlocksProps) {
-  const items = dayItems(day)
-  if (items.length === 0) return <p className="text-ink-muted">Nada marcado neste dia. Uma pausa também conta.</p>
-
-  return (
-    <ol className="flex flex-col gap-3">
-      {items.map((item) => (
-        <li key={item.key} className="flex gap-3">
-          <span className="w-12 shrink-0 pt-3 type-meta tabular-nums text-ink-muted">{timeOfDayLabel(item.start)}</span>
-          <div className="min-w-0 flex-1">
-            <BlockRow block={item.block} date={day.date} dates={movableDates(week, item.block.taskId, day.date, today)} />
-          </div>
-        </li>
-      ))}
-    </ol>
   )
 }

@@ -1,6 +1,5 @@
 import { formatDuration } from '@/shared/time/timeOfDay'
 import type { PlannedDay } from './api/routineTypes'
-import { blockMinutes } from './blockTime'
 import { dayItems, freeGaps, type FreeGap } from './dayItems'
 import { planDay } from './dayPlan'
 import { visibleHours, type HourRange } from './weekGrid'
@@ -13,8 +12,6 @@ export type DayFree = {
   isPast: boolean
   isEmpty: boolean
 }
-
-export type AreaHours = { area: string; minutes: number }
 
 // O dia livre conta do início ao fim da grade (7h às 22h, ou mais quando algo passa disso); hoje, a partir de agora.
 export function dayFree(day: PlannedDay, range: HourRange, today: string, now: number): DayFree {
@@ -36,20 +33,6 @@ export function dayFree(day: PlannedDay, range: HourRange, today: string, now: n
 export function todayFree(week: PlannedDay[], today: string, now: number): DayFree | undefined {
   const day = week.find((item) => item.date === today)
   return day && dayFree(day, visibleHours(week), today, now)
-}
-
-// Na semana em andamento conta o que ainda vem; nas outras, a semana inteira.
-export function weekFreeMinutes(days: DayFree[]) {
-  const upcoming = days.filter((day) => !day.isPast)
-  return (upcoming.length > 0 ? upcoming : days).reduce((sum, day) => sum + day.freeMinutes, 0)
-}
-
-export function plannedByArea(days: PlannedDay[]): AreaHours[] {
-  const totals = new Map<string, number>()
-  for (const block of days.flatMap((day) => day.blocks ?? [])) {
-    totals.set(block.area, (totals.get(block.area) ?? 0) + blockMinutes(block))
-  }
-  return [...totals].map(([area, minutes]) => ({ area, minutes })).sort((a, b) => b.minutes - a.minutes)
 }
 
 const minFreeLabel = 4 * 60

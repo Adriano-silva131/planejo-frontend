@@ -42,6 +42,11 @@ export function weekdayIn(date: Date) {
   return `${isWeekend(date) ? 'no' : 'na'} ${shortWeekdayName(date)}`
 }
 
+// "nesta terça", "neste sábado": o dia que um ajuste muda, e só ele.
+export function thisWeekdayLabel(date: Date) {
+  return `${isWeekend(date) ? 'neste' : 'nesta'} ${shortWeekdayName(date)}`
+}
+
 // "da terça", "do sábado".
 export function weekdayOf(date: Date) {
   return `${isWeekend(date) ? 'do' : 'da'} ${shortWeekdayName(date)}`

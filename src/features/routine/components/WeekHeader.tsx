@@ -1,37 +1,42 @@
-import { Plus } from 'lucide-react'
+import { QuickAddButton } from '@/shared/planning/QuickAddButton'
 import { isoWeekNumber, weekRangeLabel } from '@/shared/time/week'
-import { ButtonLink } from '@/shared/ui/ButtonLink'
 import { PageHeader } from '@/shared/ui/PageHeader'
 import { WeekStepper } from '@/shared/ui/WeekStepper'
 
+// Sessões das recorrentes feitas na semana, das que ela pede. Numa semana que ainda não começou, só as previstas.
+export type WeekScore = { done: number; total: number; upcoming: boolean }
+
 export type WeekHeaderProps = {
   start: Date
-  freeMinutes?: number
+  score?: WeekScore
+  // Dia aberto: o Adicionar rápido já vem nele.
+  addDate?: string
   onPrevious: () => void
   onNext: () => void
   onToday: () => void
 }
 
-export function WeekHeader({ start, freeMinutes, onPrevious, onNext, onToday }: WeekHeaderProps) {
+export function WeekHeader({ start, score, addDate, onPrevious, onNext, onToday }: WeekHeaderProps) {
   return (
     <PageHeader
       eyebrow={`${weekRangeLabel(start)} · Semana ${isoWeekNumber(start)}`}
       title={
-        freeMinutes === undefined ? (
+        !score || score.total === 0 ? (
           'Semana'
+        ) : score.upcoming ? (
+          <>
+            <span className="text-peach-ink">{score.total}</span> sessões previstas.
+          </>
         ) : (
           <>
-            Uma semana com <span className="text-peach-ink">{Math.floor(freeMinutes / 60)}h</span> livres.
+            <span className="text-peach-ink">{score.done}</span> de {score.total} feitas.
           </>
         )
       }
       actions={
         <>
           <WeekStepper onPrevious={onPrevious} onNext={onNext} onToday={onToday} />
-          <ButtonLink to="/atividades?atividade=nova" aria-label="Adicionar atividade">
-            <Plus aria-hidden="true" className="size-5" />
-            <span className="hidden sm:inline">Atividade</span>
-          </ButtonLink>
+          <QuickAddButton draft={{ date: addDate }} />
         </>
       }
     />

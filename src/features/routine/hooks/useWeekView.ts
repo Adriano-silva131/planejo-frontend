@@ -6,12 +6,13 @@ import { useWeekParam } from '@/shared/time/useWeekParam'
 import type { PlannedDay } from '../api/routineTypes'
 import { useWeekRoutine } from '../api/useWeekRoutine'
 import { visibleHours } from '../weekGrid'
-import { dayFree, weekFreeMinutes } from '../weekSummary'
+import { dayViewParam } from './useDayView'
+import { dayFree } from '../weekSummary'
 
 export function useWeekView() {
   const date = useNow()
-  const week = useWeekParam(date, 'semana', ['dia'])
-  const openDay = useDayParam(week.start)
+  const week = useWeekParam(date, 'semana', ['dia', dayViewParam])
+  const openDay = useDayParam(week.start, 'dia', [dayViewParam])
   const routine = useWeekRoutine(week.iso)
   const today = toIsoDate(date)
   const now = minutesSinceMidnight(date)
@@ -26,7 +27,6 @@ export function useWeekView() {
     free,
     today,
     now,
-    totalFree: routine.isSuccess ? weekFreeMinutes(free) : undefined,
     // Dia aberto na grade da Semana (?dia=); undefined na visão geral.
     openDate: openDay.date,
     openDay: openDay.open,

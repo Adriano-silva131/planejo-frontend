@@ -1,9 +1,8 @@
-import { ArrowRight, X } from 'lucide-react'
+import { X } from 'lucide-react'
 import { fromIsoDate } from '@/shared/time/calendarDate'
 import { longDateLabel, shortWeekdayLabel } from '@/shared/time/dateLabels'
 import { formatDuration } from '@/shared/time/timeOfDay'
 import { Button } from '@/shared/ui/Button'
-import { ButtonLink } from '@/shared/ui/ButtonLink'
 import { joinClasses } from '@/shared/ui/joinClasses'
 import { columnWidthClasses, openDayTitleId } from '../weekColumns'
 import type { DayFree } from '../weekSummary'
@@ -37,12 +36,6 @@ export function OpenDayHeader({ free, isToday, endHour, onClose }: OpenDayHeader
         <p className="truncate type-meta text-ink-muted">{freeText}</p>
       </div>
       <div className="flex shrink-0 items-center gap-1">
-        {isToday && (
-          <ButtonLink to="/meu-dia" variant="secondary">
-            Meu dia
-            <ArrowRight aria-hidden="true" className="size-4" />
-          </ButtonLink>
-        )}
         <Button variant="ghost" size="icon" aria-label={`Fechar ${longDateLabel(date)}`} onClick={onClose}>
           <X aria-hidden="true" className="size-5" />
         </Button>

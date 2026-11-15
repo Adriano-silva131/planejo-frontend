@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Outlet } from 'react-router'
+import { QuickAddProvider } from '@/features/tasks/components/QuickAddProvider'
 import { useAreaColorStyles } from '@/features/tasks/hooks/useAreaColorStyles'
 import { SidebarSlotContext } from '@/shared/ui/sidebarSlotContext'
 import { BottomNav } from './BottomNav'
@@ -11,6 +12,7 @@ export function AppShell() {
 
   return (
     <SidebarSlotContext value={sidebarSlot}>
+      <QuickAddProvider>
       <div className="min-h-screen lg:flex">
         <SideNav slotRef={setSidebarSlot} />
         <main className="min-w-0 flex-1 px-4 pt-6 pb-28 md:px-8 lg:py-6">
@@ -20,6 +22,7 @@ export function AppShell() {
         </main>
         <BottomNav />
       </div>
+      </QuickAddProvider>
     </SidebarSlotContext>
   )
 }
